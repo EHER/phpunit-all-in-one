@@ -15,6 +15,6 @@ $paths = array(
   $dirPath . '/phpunit-mock-objects',
 );
 
-ini_set("include_path", implode(":", $paths)  );
+ini_set("include_path", implode(":", $paths));
 
-require "phpunit/phpunit.php";
+require $dirPath . "/phpunit/phpunit.php";
