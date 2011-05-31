@@ -1,0 +1,27 @@
+[submodule "phpunit"]
+	path = phpunit
+	url = git://github.com/sebastianbergmann/phpunit.git
+[submodule "dbunit"]
+	path = dbunit
+	url = git://github.com/sebastianbergmann/dbunit.git
+[submodule "php-file-iterator"]
+	path = php-file-iterator
+	url = git://github.com/sebastianbergmann/php-file-iterator.git
+[submodule "php-text-template"]
+	path = php-text-template
+	url = git://github.com/sebastianbergmann/php-text-template.git
+[submodule "php-code-coverage"]
+	path = php-code-coverage
+	url = git://github.com/sebastianbergmann/php-code-coverage.git
+[submodule "php-token-stream"]
+	path = php-token-stream
+	url = git://github.com/sebastianbergmann/php-token-stream.git
+[submodule "php-timer"]
+	path = php-timer
+	url = git://github.com/sebastianbergmann/php-timer.git
+[submodule "phpunit-mock-objects"]
+	path = phpunit-mock-objects
+	url = git://github.com/sebastianbergmann/phpunit-mock-objects.git
+[submodule "phpunit-selenium"]
+	path = phpunit-selenium
+	url = git://github.com/sebastianbergmann/phpunit-selenium.git
