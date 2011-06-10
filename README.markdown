@@ -1,5 +1,8 @@
 # PHPUnit All in One
 
+That's another way to install PHPUnit without the PEAR
+
+
 ## How to install
 
 	git clone git@github.com:EHER/phpunit-all-in-one.git
