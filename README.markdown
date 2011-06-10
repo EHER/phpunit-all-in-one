@@ -10,5 +10,7 @@
 ## Running phpunit 
 
 	./phpunit.php
-or 
+
+or
+
 	/path/to/phpunit-all-in-one/phpunit.php
