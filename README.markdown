@@ -4,7 +4,8 @@
 
 	git clone git@github.com:EHER/phpunit-all-in-one.git
 	cd phpunit-all-in-one
-	git submodule --init update
+	git submodule init
+	git submodule update
 
 
 ## Running phpunit 
