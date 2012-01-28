@@ -7,14 +7,13 @@ That's another way to install PHPUnit without the PEAR
 
 	git clone git@github.com:EHER/phpunit-all-in-one.git
 	cd phpunit-all-in-one
-	./install.sh
+	make
 
 or
 
 	git clone git@github.com:EHER/phpunit-all-in-one.git
 	cd phpunit-all-in-one
-	git submodule init
-	git submodule update
+	git submodule update --init
 
 
 ## Running phpunit 
