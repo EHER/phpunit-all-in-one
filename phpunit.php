@@ -5,6 +5,7 @@ $dirPath = __DIR__;
 
 $paths = array(
   ini_get("include_path"),
+  $dirPath . '/vendor/symfony/finder',
   $dirPath . '/dbunit',
   $dirPath . '/php-file-iterator',
   $dirPath . '/php-timer',
