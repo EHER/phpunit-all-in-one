@@ -24,3 +24,7 @@ Add ["EHER/PHPUnit"](http://packagist.org/packages/EHER/PHPUnit) package to your
         }
     }
 
+After install/update vendors with Composer, you can simply run
+
+    php vendor/EHER/PHPUnit/phpunit.php
+
