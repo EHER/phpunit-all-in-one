@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/init.php';
+
+require 'PHPUnit' . DIRECTORY_SEPARATOR . 'Autoload.php';
+
+if(method_exists('PHP_CodeCoverage_Filter', 'getInstance')) {
+    PHP_CodeCoverage_Filter::getInstance()->addFileToBlacklist(__FILE__, 'PHPUNIT');
+}
+
+$command = new PHPUnit_Extensions_Database_UI_Command(
+  new PHPUnit_Extensions_Database_UI_ModeFactory()
+);
+
+$command->main(
+  new PHPUnit_Extensions_Database_UI_Mediums_Text($_SERVER['argv']),
+  new PHPUnit_Extensions_Database_UI_Context()
+);
