@@ -6,11 +6,11 @@ That's another way to install PHPUnit without the PEAR
 
 Just clone and run
 
-	./phpunit.php
+	./bin/phpunit
 
 or
 
-	/path/to/phpunit-all-in-one/phpunit.php
+	/path/to/phpunit-all-in-one/bin/phpunit
 
 
 ## Composer

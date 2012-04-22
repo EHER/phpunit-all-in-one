@@ -1,0 +1,7 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/init.php';
+
+require_once PEAR_ROOT_PATH . '/phpdcd/phpdcd.php';
+
