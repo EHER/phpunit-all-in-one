@@ -2,7 +2,7 @@
 
 $root = dirname(__DIR__) . '/src';
 
-$paths = array($root . '/php');
+$paths = array();
 
 foreach(new DirectoryIterator($root) as $item) {
     if($item->isDot()) {
