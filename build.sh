@@ -49,7 +49,7 @@ fix_version() {
         VER=$(git describe --tags 2> /dev/null || git branch)
         VER=$(echo "$VER" | sed -n 's/\([0-9.]*\).*/\1/p')
         [ "$VER" ] && \
-            find . -type f -name '*.php' -exec sed "s/@package_version@/$VER/g" -i {} \;
+            find . -type f -name '*.php' -exec perl -pi -e "s/\@package_version\@/$VER/g" {} \;
     done
 }
 
