@@ -17,7 +17,7 @@ set_include_path(implode(PATH_SEPARATOR, $paths));
 
 define('PEAR_ROOT_PATH', $root);
 
-$composerLoader = __DIR__ . '/../../.composer/autoload.php';
+$composerLoader = __DIR__ . '/../../../.composer/autoload.php';
 if (file_exists($composerLoader)) {
     $loader = require_once $composerLoader;
 } else {
