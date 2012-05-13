@@ -1,31 +1,33 @@
 <?php
 
-$root = dirname(__DIR__) . '/src';
+call_user_func(function() {
 
-$paths = array();
+	$root = dirname(__DIR__) . '/src';
 
-foreach(new DirectoryIterator($root) as $item) {
-    if($item->isDot()) {
-        continue;
-    }
-    $fileName = $root . '/' . $item->getFileName();
-    $paths[] = $fileName;
-}
+	$paths = array();
 
-$paths[] = get_include_path();
-set_include_path(implode(PATH_SEPARATOR, $paths));
+	foreach(new DirectoryIterator($root) as $item) {
+			if($item->isDot()) {
+					continue;
+			}
+			$fileName = $root . '/' . $item->getFileName();
+			$paths[] = $fileName;
+	}
 
-define('PEAR_ROOT_PATH', $root);
+	$paths[] = get_include_path();
+	set_include_path(implode(PATH_SEPARATOR, $paths));
 
-$composerLoader = __DIR__ . '/../../.composer/autoload.php';
-if (file_exists($composerLoader)) {
-    $loader = require_once $composerLoader;
-} else {
-    require_once $root . '/symfony-class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php';
-    $loader = new \Symfony\Component\ClassLoader\UniversalClassLoader;
-    $loader->registerNamespaces(array(
-        'Symfony' => array($root . '/symfony-class-loader', $root . '/symfony-finder')
-    ));
-    $loader->register();
-}
+	define('PEAR_ROOT_PATH', $root);
 
+	$composerLoader = __DIR__ . '/../../.composer/autoload.php';
+	if (file_exists($composerLoader)) {
+			$loader = require_once $composerLoader;
+	} else {
+			require_once $root . '/symfony-class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php';
+			$loader = new \Symfony\Component\ClassLoader\UniversalClassLoader;
+			$loader->registerNamespaces(array(
+					'Symfony' => array($root . '/symfony-class-loader', $root . '/symfony-finder')
+			));
+			$loader->register();
+	}
+});
