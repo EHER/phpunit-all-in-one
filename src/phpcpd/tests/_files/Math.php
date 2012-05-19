@@ -37,7 +37,7 @@
  * @package   Example
  * @author    Manuel Pichler <mapi@phpundercontrol.org>
  * @copyright 2007-2011 Manuel Pichler. All rights reserved.
- * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license   http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @version   SVN: $Id$
  * @link      http://www.phpundercontrol.org/
  */
@@ -48,7 +48,7 @@
  * @package   Example
  * @author    Manuel Pichler <mapi@phpundercontrol.org>
  * @copyright 2007-2011 Manuel Pichler. All rights reserved.
- * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license   http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @version   Release: 1.3.5
  * @link      http://www.phpundercontrol.org/
  */

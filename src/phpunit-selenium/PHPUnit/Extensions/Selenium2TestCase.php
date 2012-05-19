@@ -37,7 +37,7 @@
  * @package    PHPUnit_Selenium
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 1.2.0
  */
@@ -50,7 +50,7 @@
  * @package    PHPUnit_Selenium
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @version    Release: 1.2.6
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.0
@@ -143,17 +143,23 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
         return new PHPUnit_Extensions_Selenium2TestCase_SessionStrategy_Isolated;
     }
 
+    public function prepareSession()
+    {
+        if (!$this->session) {
+            $this->session = self::sessionStrategy()->session(array('host'      => $this->host,
+                                                                   'port'       => $this->port,
+                                                                   'browser'    => $this->browser,
+                                                                   'browserUrl' => $this->browserUrl));
+        }
+        return $this->session;
+    }
+
     /**
      * @throws RuntimeException
      */
     protected function runTest()
     {
-        $this->session = self::sessionStrategy()->session(array(
-            'host' => $this->host,
-            'port' => $this->port,
-            'browser' => $this->browser,
-            'browserUrl' => $this->browserUrl
-        ));
+        $this->prepareSession();
 
         parent::runTest();
 

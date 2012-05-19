@@ -37,7 +37,7 @@
  * @package    PHPUnit_Selenium
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2010-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 1.0.0
  */
@@ -49,7 +49,7 @@
  * @package    PHPUnit_Selenium
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2010-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @version    Release: 1.2.6
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.0.0
@@ -264,6 +264,8 @@
  * @method unknown  useXpathLibrary()
  * @method unknown  useXpathLibraryAndWait()
  * @method unknown  waitForCondition()
+ * @method unknown  waitForElementPresent()
+ * @method unknown  waitForElementNotPresent()
  * @method unknown  waitForPageToLoad()
  * @method unknown  waitForPopUp()
  * @method unknown  windowFocus()
@@ -1029,7 +1031,7 @@ abstract class PHPUnit_Extensions_SeleniumTestCase extends PHPUnit_Framework_Tes
      * Return an empty string if the screenshotPath and screenshotUrl
      * properties are empty.
      * Issue #88.
-     * 
+     *
      * @access protected
      * @return string
      */
