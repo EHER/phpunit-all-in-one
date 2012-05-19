@@ -19,7 +19,7 @@ call_user_func(function() {
 
     define('PEAR_ROOT_PATH', $root);
 
-    $composerLoaderWhenInstalled = __DIR__ . '/../autoload.php';
+    $composerLoaderWhenInstalled = __DIR__ . '/../../../autoload.php';
     $composerLoaderWhenCloned   = __DIR__ . '/../vendor/autoload.php';
 
     if (file_exists($composerLoaderWhenInstalled)) {
