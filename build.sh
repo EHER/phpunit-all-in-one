@@ -36,8 +36,6 @@ finder-facade"
     git clone git://github.com/theseer/fDOMDocument.git
     git clone git://github.com/naderman/ezc-base.git $EZC_TMP/Base
     git clone git://github.com/naderman/ezc-console-tools.git $EZC_TMP/ConsoleTools
-    git clone git://github.com/symfony/Finder.git symfony-finder/Symfony/Component/Finder
-    git clone git://github.com/symfony/ClassLoader.git symfony-class-loader/Symfony/Component/ClassLoader
 }
 
 fix_version() {
