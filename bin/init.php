@@ -2,32 +2,34 @@
 
 call_user_func(function() {
 
-	$root = dirname(__DIR__) . '/src';
+    $root = dirname(__DIR__) . '/src';
 
-	$paths = array();
+    $paths = array();
 
-	foreach(new DirectoryIterator($root) as $item) {
-			if($item->isDot()) {
-					continue;
-			}
-			$fileName = $root . '/' . $item->getFileName();
-			$paths[] = $fileName;
-	}
+    foreach(new DirectoryIterator($root) as $item) {
+        if($item->isDot()) {
+            continue;
+        }
+        $fileName = $root . '/' . $item->getFileName();
+        $paths[] = $fileName;
+    }
 
-	$paths[] = get_include_path();
-	set_include_path(implode(PATH_SEPARATOR, $paths));
+    $paths[] = get_include_path();
+    set_include_path(implode(PATH_SEPARATOR, $paths));
 
-	define('PEAR_ROOT_PATH', $root);
+    define('PEAR_ROOT_PATH', $root);
 
-	$composerLoader = __DIR__ . '/../../.composer/autoload.php';
-	if (file_exists($composerLoader)) {
-			$loader = require_once $composerLoader;
-	} else {
-			require_once $root . '/symfony-class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php';
-			$loader = new \Symfony\Component\ClassLoader\UniversalClassLoader;
-			$loader->registerNamespaces(array(
-					'Symfony' => array($root . '/symfony-class-loader', $root . '/symfony-finder')
-			));
-			$loader->register();
-	}
+    $composerLoaderWhenInstalled = __DIR__ . '/../autoload.php';
+    $composerLoaderWhenCloned   = __DIR__ . '/../vendor/autoload.php';
+
+    if (file_exists($composerLoaderWhenInstalled)) {
+        $loader = require_once $composerLoaderWhenInstalled;
+    } else if (file_exists($composerLoaderWhenCloned)) {
+        $loader = require_once $composerLoaderWhenCloned;
+    } else {
+        echo "Can't find ComposerLoader.\n";
+        echo "try:\n";
+        echo "\tphp composer.phar update";
+        exit();
+    }
 });
