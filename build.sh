@@ -6,6 +6,8 @@ EZC_TMP="$VENDOR/php/tmp"
 EZC_ROOT="$VENDOR/php/ezc"
 EZC_AUTOLOAD="$EZC_ROOT/autoload"
 
+COMPOSER_ONLY=1
+
 _init() {
     mkdir -p "$VENDOR"
     mkdir -p "$EZC_AUTOLOAD"
@@ -36,6 +38,8 @@ finder-facade"
     git clone git://github.com/theseer/fDOMDocument.git
     git clone git://github.com/naderman/ezc-base.git $EZC_TMP/Base
     git clone git://github.com/naderman/ezc-console-tools.git $EZC_TMP/ConsoleTools
+    [ "$COMPOSER_ONLY" ] || git clone git://github.com/symfony/Finder.git symfony-finder/Symfony/Component/Finder
+    [ "$COMPOSER_ONLY" ] || git clone git://github.com/symfony/ClassLoader.git symfony-class-loader/Symfony/Component/ClassLoader
 }
 
 fix_version() {
@@ -47,7 +51,7 @@ fix_version() {
         VER=$(git describe --tags 2> /dev/null || git branch)
         VER=$(echo "$VER" | sed -n 's/\([0-9.]*\).*/\1/p')
         [ "$VER" ] && \
-            find . -type f -name '*.php' -exec perl -pi -e "s/\@package_version\@/$VER/g" {} \;
+            find . -type f -name '*.php' -exec sed "s/@package_version@/$VER/g" -i {} \;
     done
 }
 
@@ -83,8 +87,8 @@ clean() {
     for i in $VENDOR/* ; do
         rm -rf "$i/.git"
     done
-    rm -rf "$VENDOR/symfony-finder/Symfony/Component/Finder/.git"
-    rm -rf "$VENDOR/symfony-class-loader/Symfony/Component/ClassLoader/.git"
+    [ "$COMPOSER_ONLY" ] || rm -rf "$VENDOR/symfony-finder/Symfony/Component/Finder/.git"
+    [ "$COMPOSER_ONLY" ] || rm -rf "$VENDOR/symfony-class-loader/Symfony/Component/ClassLoader/.git"
     rm -rf "$EZC_TMP"
 }
 
