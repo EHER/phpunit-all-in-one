@@ -41,7 +41,7 @@ class ezcBase
      *
      * @var string
      */
-    private static $libraryMode = 'pear';
+    private static $libraryMode = "devel";
 
     /**
      * Contains the current working directory, which is used when the
@@ -222,7 +222,7 @@ class ezcBase
      */
     public static function setWorkingDirectory( $directory )
     {
-        self::$libraryMode = 'pear';
+        self::$libraryMode = 'custom';
         self::$currentWorkingDirectory = $directory;
     }
 
