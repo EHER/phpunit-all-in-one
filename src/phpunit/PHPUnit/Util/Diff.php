@@ -53,7 +53,7 @@
  * @author     Kore Nordmann <mail@kore-nordmann.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.6.10
+ * @version    Release: 3.6.11
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.4.0
  */
@@ -192,12 +192,12 @@ class PHPUnit_Util_Diff
         $diff = array();
         $line = 0;
 
-        if(isset($fromMatches[0]) 
-            && $toMatches[0] 
-            && count($fromMatches[0]) === count($toMatches[0]) 
-            && $fromMatches[0] !== $toMatches[0]
-        ) {
-            $diff[] = array('#Warning: Strings contain different line endings!', 0);
+        if (isset($fromMatches[0]) && $toMatches[0] &&
+            count($fromMatches[0]) === count($toMatches[0]) &&
+            $fromMatches[0] !== $toMatches[0]) {
+            $diff[] = array(
+              '#Warning: Strings contain different line endings!', 0
+            );
         }
 
         foreach ($start as $token) {

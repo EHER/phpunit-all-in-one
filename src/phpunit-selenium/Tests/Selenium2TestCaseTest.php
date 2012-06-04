@@ -49,7 +49,7 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.6
+ * @version    Release: 1.2.7
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.0.0
  */
@@ -59,6 +59,11 @@ class Extensions_Selenium2TestCaseTest extends Tests_Selenium2TestCase_BaseTestC
     {
         $this->url('html/test_open.html');
         $this->assertStringEndsWith('html/test_open.html', $this->url());
+    }
+
+    public function testVersionCanBeReadFromTheTestCaseClass()
+    {
+        $this->assertEquals(1, version_compare(PHPUnit_Extensions_Selenium2TestCase::VERSION, "1.2.0"));
     }
 
     public function testCamelCaseUrlsAreSupported()
@@ -97,6 +102,16 @@ class Extensions_Selenium2TestCaseTest extends Tests_Selenium2TestCase_BaseTestC
     {
         $this->markTestIncomplete('Which API to call session/1/element/active?');
         $this->keys(array('value' => array())); // should send key strokes to the active element
+    }
+
+    public function testActivePageElementReceivesTheKeyStrokes()
+    {
+        $this->timeouts()->implicitWait(10000);
+
+        $this->url('html/test_send_keys.html');
+        $this->byId('q')->click();
+        $this->keys('phpunit ');
+        $this->assertEquals('phpunit', $this->byId('result')->text());
     }
 
     public function testElementsCanBeSelectedAsChildrenOfAlreadyFoundElements()

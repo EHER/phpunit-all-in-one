@@ -68,7 +68,6 @@ fix_ezc() {
         cp -R $i/src $EZC_ROOT/$(basename $i)
         cp $i/src/*_autoload.php "$EZC_AUTOLOAD"
     done
-    sed "s/\(\$libraryMode =[ ]*\).*/\1'pear';/g" -i $EZC_ROOT/Base/base.php
 }
 
 fix_finder_facade() {
@@ -92,6 +91,11 @@ clean() {
     rm -rf "$EZC_TMP"
 }
 
+fix_sources() {
+    cd $VENDOR
+    sed "s/\(\$libraryMode =[ ]*\).*/\1'pear';/g" -i $EZC_ROOT/Base/base.php
+}
+
 rm -rf "$VENDOR"
 _init
 download
@@ -100,4 +104,5 @@ fix_fdomdocument
 fix_ezc
 fix_finder_facade
 fix_eoln
+fix_sources
 clean

@@ -51,7 +51,7 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.6
+ * @version    Release: 1.2.7
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.0
  * @method void acceptAlert() Press OK on an alert, or confirms a dialog
@@ -81,9 +81,12 @@
  * @method void window($name) Changes the focus to another window
  * @method string windowHandle() Retrieves the current window handle
  * @method string windowHandles() Retrieves a list of all available window handles
+ * @method string keys() Send a sequence of key strokes to the active element.
  */
 abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_TestCase
 {
+    const VERSION = "1.2.7";
+
     /**
      * @var PHPUnit_Extensions_Selenium2TestCase_Session
      */
@@ -161,13 +164,23 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
     {
         $this->prepareSession();
 
-        parent::runTest();
+        $thrownException = NULL;
 
-        if (!empty($this->verificationErrors)) {
-            $this->fail(implode("\n", $this->verificationErrors));
+        try {
+            parent::runTest();
+
+            if (!empty($this->verificationErrors)) {
+                $this->fail(implode("\n", $this->verificationErrors));
+            }
+        } catch (Exception $e) {
+            $thrownException = $e;
         }
 
         self::sessionStrategy()->endOfTest($this->session);
+
+        if (NULL !== $thrownException) {
+            throw $thrownException;
+        }
     }
 
     public function onNotSuccessfulTest(Exception $e)
