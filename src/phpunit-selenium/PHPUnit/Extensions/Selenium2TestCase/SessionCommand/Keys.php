@@ -35,39 +35,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
+ * @author     Christian Soronellas <csoronellas@emagister.com>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
- * @since      File available since Release 1.2.4
+ * @since      File available since Release 1.2.0
  */
 
 /**
- * Retrieves an attribute of a DOM element.
+ * Gets or sets the current URL of the window.
  *
  * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
+ * @author     Christian Soronellas <csoronellas@emagister.com>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @version    Release: 1.2.7
  * @link       http://www.phpunit.de/
- * @since      Class available since Release 1.2.4
+ * @since      Class available since Release 1.2.0
  */
-class PHPUnit_Extensions_Selenium2TestCase_ElementCommand_Attribute
+class PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Keys
     extends PHPUnit_Extensions_Selenium2TestCase_Command
 {
-    /**
-     * @param array $parameter
-     */
-    public function __construct($parameter,
-                                PHPUnit_Extensions_Selenium2TestCase_URL $attributeResourceBaseUrl)
+    public function __construct($jsonParameters,
+                                PHPUnit_Extensions_Selenium2TestCase_URL $url)
     {
-        $this->jsonParameters = array();
-        $this->url = $attributeResourceBaseUrl->descend($parameter);
+        if (is_string($jsonParameters)) {
+            $jsonParameters = $this->keysForText($jsonParameters);
+        }
+
+        parent::__construct($jsonParameters, $url);
     }
 
+    /**
+     * @return string
+     */
     public function httpMethod()
     {
-        return 'GET';
+        return 'POST';
+    }
+
+    /**
+     * Given a string returns an array of the characters that compose the string
+     *
+     * @param string $text
+     * @throws InvalidArgumentException
+     * @return array
+     */
+    public function keysForText($text)
+    {
+        if (!is_string($text)) {
+            throw new InvalidArgumentException('The "text" argument should be a string!');
+        }
+
+        return array('value' => preg_split('//u', $text, -1, PREG_SPLIT_NO_EMPTY));
     }
 }

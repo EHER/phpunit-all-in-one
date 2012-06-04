@@ -49,45 +49,19 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.6
+ * @version    Release: 1.2.7
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.0
  */
 class PHPUnit_Extensions_Selenium2TestCase_ElementCommand_Value
-    extends PHPUnit_Extensions_Selenium2TestCase_Command
+    extends PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Keys
 {
-
-    public function __construct($jsonParameters,
-                                PHPUnit_Extensions_Selenium2TestCase_URL $url)
-    {
-        if (is_string($jsonParameters)) {
-            $jsonParameters = $this->charactersToType($jsonParameters);
-        }
-        parent::__construct($jsonParameters, $url);
-    }
-
     public function httpMethod()
     {
         if ($this->jsonParameters) {
             return 'POST';
-        } else {
-            return 'GET';
         }
-    }
 
-    /**
-     * @param string $string
-     * @return array    array of characters to type
-     */
-    private function charactersToType($string)
-    {
-        $characters = array();
-        for ($i = 0, $length = strlen($string); $i < $length; $i++) {
-            $characters[] = mb_substr($string, $i, 1, 'UTF-8');
-        }
-        return array(
-            'value' => $characters
-        );
+        return 'GET';
     }
-
 }
