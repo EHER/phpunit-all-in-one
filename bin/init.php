@@ -15,14 +15,20 @@ call_user_func(function() {
     }
 
     define('PEAR_ROOT_PATH', $root);
+    $useComposer = false;
+    if ($useComposer) {
+        $composerLoaderWhenInstalled = __DIR__ . '/../../../autoload.php';
+        $composerLoaderWhenCloned   = __DIR__ . '/../vendor/autoload.php';
+        if (file_exists($composerLoaderWhenInstalled)) {
+            $loader = require_once $composerLoaderWhenInstalled;
+        } else if (file_exists($composerLoaderWhenCloned)) {
+            $loader = require_once $composerLoaderWhenCloned;
+        } else {
+            $useComposer = false;
+        }
+    }
 
-    $composerLoaderWhenInstalled = __DIR__ . '/../../../autoload.php';
-    $composerLoaderWhenCloned   = __DIR__ . '/../vendor/autoload.php';
-    if (file_exists($composerLoaderWhenInstalled)) {
-        $loader = require_once $composerLoaderWhenInstalled;
-    } else if (file_exists($composerLoaderWhenCloned)) {
-        $loader = require_once $composerLoaderWhenCloned;
-    } else {
+    if (!$useComposer) {
         $classLoader = $root . '/symfony-class-loader/Symfony/Component/ClassLoader/UniversalClassLoader.php';
 
         //fallback mode, if no composer installed, try to use symfony components in src
@@ -30,7 +36,9 @@ call_user_func(function() {
             require_once $classLoader;
             $loader = new \Symfony\Component\ClassLoader\UniversalClassLoader;
             $loader->registerNamespaces(array(
-                'Symfony' => array($root . '/symfony-class-loader', $root . '/symfony-finder')
+                'Symfony\\Component\\ClassLoader' => $root . '/symfony-class-loader',
+                'Symfony\\Component\\Finder'      => $root . '/symfony-finder',
+                'Symfony\\Component\\Yaml'        => $root . '/symfony-yaml',
             ));
             $loader->register();
         } else {

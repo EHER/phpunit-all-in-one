@@ -6,7 +6,7 @@ EZC_TMP="$VENDOR/php/tmp"
 EZC_ROOT="$VENDOR/php/ezc"
 EZC_AUTOLOAD="$EZC_ROOT/autoload"
 
-COMPOSER_ONLY=1
+COMPOSER_ONLY=
 
 _init() {
     mkdir -p "$VENDOR"
@@ -39,6 +39,7 @@ finder-facade"
     git clone git://github.com/naderman/ezc-base.git $EZC_TMP/Base
     git clone git://github.com/naderman/ezc-console-tools.git $EZC_TMP/ConsoleTools
     [ "$COMPOSER_ONLY" ] || git clone git://github.com/symfony/Finder.git symfony-finder/Symfony/Component/Finder
+    [ "$COMPOSER_ONLY" ] || git clone git://github.com/symfony/Yaml symfony-yaml/Symfony/Component/Yaml
     [ "$COMPOSER_ONLY" ] || git clone git://github.com/symfony/ClassLoader.git symfony-class-loader/Symfony/Component/ClassLoader
 }
 
