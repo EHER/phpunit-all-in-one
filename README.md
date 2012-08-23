@@ -15,16 +15,16 @@ or
 
 ## Composer
 
-Add ["EHER/PHPUnit"](http://packagist.org/packages/EHER/PHPUnit) package to your composer.json file
+Add ["zerkalica/phpunit"](http://packagist.org/packages/zerkalica/phpunit) package to your composer.json file
 
     {
         "require": {
             "php":          ">=5.3.2",
-            "zerkalica/PHPUnit": ">=1.2"
+            "zerkalica/phpunit": ">=1.2"
         }
     }
 
 After install/update vendors with Composer, you can simply run
 
-    php vendor/zerkalica/PHPUnit/phpunit.php
+    php vendor/zerkalica/phpunit/bin/phpunit.php
 
