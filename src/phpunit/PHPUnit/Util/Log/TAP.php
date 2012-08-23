@@ -38,13 +38,13 @@
  * @subpackage Util_Log
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.0.0
  */
 
-if (!class_exists('sfYamlDumper', FALSE)) {
-    require_once 'SymfonyComponents/YAML/sfYamlDumper.php';
+if (!class_exists('Symfony\\Component\\Yaml\\Dumper', FALSE)) {
+    require_once 'Symfony/Component/Yaml/Dumper.php';
 }
 
 /**
@@ -55,8 +55,8 @@ if (!class_exists('sfYamlDumper', FALSE)) {
  * @subpackage Util_Log
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.6.11
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
@@ -81,7 +81,7 @@ class PHPUnit_Util_Log_TAP extends PHPUnit_Util_Printer implements PHPUnit_Frame
      * Constructor.
      *
      * @param  mixed $out
-     * @throws InvalidArgumentException
+     * @throws PHPUnit_Framework_Exception
      * @since  Method available since Release 3.3.4
      */
     public function __construct($out = NULL)
@@ -133,7 +133,7 @@ class PHPUnit_Util_Log_TAP extends PHPUnit_Util_Printer implements PHPUnit_Frame
             }
         }
 
-        $yaml = new sfYamlDumper();
+        $yaml = new Symfony\Component\Yaml\Dumper;
 
         $this->write(
           sprintf(

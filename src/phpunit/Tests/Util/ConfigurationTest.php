@@ -37,7 +37,7 @@
  * @package    PHPUnit
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.3.0
  */
@@ -48,8 +48,8 @@
  * @package    PHPUnit
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.6.11
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.3.0
  */
@@ -60,7 +60,7 @@ class Util_ConfigurationTest extends PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->configuration = PHPUnit_Util_Configuration::getInstance(
-          dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'configuration.xml'
+          dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'configuration.xml'
         );
     }
 
@@ -115,7 +115,7 @@ class Util_ConfigurationTest extends PHPUnit_Framework_TestCase
             ),
             'whitelist' =>
             array(
-              'addUncoveredFilesFromWhitelist' => TRUE,
+              'processUncoveredFilesFromWhitelist' => FALSE,
               'include' =>
               array(
                 'directory' =>
@@ -175,7 +175,7 @@ class Util_ConfigurationTest extends PHPUnit_Framework_TestCase
 
     public function testListenerConfigurationIsReadCorrectly()
     {
-        $dir = dirname(__FILE__);
+        $dir = __DIR__;
         $includePath = ini_get('include_path');
 
         ini_set('include_path', $dir . PATH_SEPARATOR . $includePath);
@@ -197,15 +197,23 @@ class Util_ConfigurationTest extends PHPUnit_Framework_TestCase
                 3 => 19.78,
                 4 => NULL,
                 5 => new stdClass,
-                6 => dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'MyTestFile.php',
-                7 => dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'MyRelativePath',
+                6 => dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'MyTestFile.php',
+                7 => dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'MyRelativePath',
               ),
             ),
             array(
               'class' => 'IncludePathListener',
               'file' => __FILE__,
               'arguments' => array()
-            )
+            ),
+            array(
+              'class' => 'CompactArgumentsListener',
+              'file' => '/CompactArgumentsListener.php',
+              'arguments' =>
+              array(
+                0 => 42
+              ),
+            ),
           ),
           $this->configuration->getListenerConfiguration()
         );
@@ -243,7 +251,7 @@ class Util_ConfigurationTest extends PHPUnit_Framework_TestCase
           array(
             'include_path' =>
             array(
-              dirname(dirname(__FILE__)) . '/_files/.',
+              dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . '.',
               '/path/to/lib'
             ),
             'ini'=> array('foo' => 'bar'),
@@ -268,7 +276,7 @@ class Util_ConfigurationTest extends PHPUnit_Framework_TestCase
     {
         $this->configuration->handlePHPConfiguration();
 
-        $path = dirname(dirname(__FILE__)) . '/_files/.' . PATH_SEPARATOR . '/path/to/lib';
+        $path = dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . '.' . PATH_SEPARATOR . '/path/to/lib';
         $this->assertStringStartsWith($path, ini_get('include_path'));
         $this->assertEquals(FALSE, FOO);
         $this->assertEquals(TRUE, BAR);

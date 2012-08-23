@@ -38,7 +38,7 @@
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 2.3.0
  */
@@ -50,8 +50,8 @@
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.6.11
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.3.0
  */
@@ -62,16 +62,14 @@ class PHPUnit_Util_Fileloader
      * The sourcefile is loaded through the load() method.
      *
      * @param  string $filename
-     * @throws RuntimeException
+     * @throws PHPUnit_Framework_Exception
      */
     public static function checkAndLoad($filename)
     {
-        $includePathFilename = PHPUnit_Util_Filesystem::fileExistsInIncludePath(
-          $filename
-        );
+        $includePathFilename = stream_resolve_include_path($filename);
 
         if (!$includePathFilename || !is_readable($includePathFilename)) {
-            throw new RuntimeException(
+            throw new PHPUnit_Framework_Exception(
               sprintf('Cannot open file "%s".' . "\n", $filename)
             );
         }

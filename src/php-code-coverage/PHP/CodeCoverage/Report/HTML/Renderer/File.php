@@ -38,15 +38,12 @@
  * @package    CodeCoverage
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.1.0
  */
 
-if (!defined('T_NAMESPACE')) {
-    define('T_NAMESPACE', 1000);
-}
-
+// @codeCoverageIgnoreStart
 if (!defined('T_TRAIT')) {
     define('T_TRAIT', 1001);
 }
@@ -58,6 +55,7 @@ if (!defined('T_INSTEADOF')) {
 if (!defined('T_CALLABLE')) {
     define('T_CALLABLE', 1003);
 }
+// @codeCoverageIgnoreEnd
 
 /**
  * Renders a PHP_CodeCoverage_Report_Node_File node.
@@ -66,8 +64,8 @@ if (!defined('T_CALLABLE')) {
  * @package    CodeCoverage
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 1.1.2
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.1.0
  */
@@ -161,8 +159,8 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
           array(
             'itemClass'                    => 'coverDirectory',
             'name'                         => 'Total',
-            'numClasses'                   => $node->getNumClasses() + $node->getNumTraits(),
-            'numTestedClasses'             => $node->getNumTestedClasses() + $node->getNumTestedTraits(),
+            'numClasses'                   => $node->getNumClassesAndTraits(),
+            'numTestedClasses'             => $node->getNumTestedClassesAndTraits(),
             'numMethods'                   => $node->getNumMethods(),
             'numTestedMethods'             => $node->getNumTestedMethods(),
             'linesExecutedPercent'         => $node->getLineExecutedPercent(FALSE),

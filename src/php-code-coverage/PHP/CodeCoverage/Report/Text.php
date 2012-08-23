@@ -38,7 +38,7 @@
  * @package    CodeCoverage
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.1.0
  */
@@ -52,8 +52,8 @@
  * @package    CodeCoverage
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 1.1.2
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.1.0
  */
@@ -91,9 +91,8 @@ class PHP_CodeCoverage_Report_Text
      */
     public function process(PHP_CodeCoverage $coverage, $showColors = FALSE)
     {
-        $output   = '';
-        $packages = array();
-        $report   = $coverage->getReport();
+        $output = '';
+        $report = $coverage->getReport();
         unset($coverage);
 
         $colors = array(
@@ -107,8 +106,8 @@ class PHP_CodeCoverage_Report_Text
 
         if ($showColors) {
             $colors['classes'] = $this->getCoverageColor(
-                                   $report->getNumTestedClasses(),
-                                   $report->getNumClasses()
+                                   $report->getNumTestedClassesAndTraits(),
+                                   $report->getNumClassesAndTraits()
                                  );
             $colors['methods'] = $this->getCoverageColor(
                                    $report->getNumTestedMethods(),
@@ -135,8 +134,8 @@ class PHP_CodeCoverage_Report_Text
                    PHP_EOL;
 
         $output .= PHP_EOL . ' Summary: ' . PHP_EOL . $colors['reset']
-          . $colors['classes'] . $colors['eol'] . '  Classes: ' . PHP_CodeCoverage_Util::percent($report->getNumTestedClasses(), $report->getNumClasses(), TRUE)
-          . ' (' . $report->getNumTestedClasses() . '/' . $report->getNumClasses() . ')' . PHP_EOL . $colors ['eol']
+          . $colors['classes'] . $colors['eol'] . '  Classes: ' . PHP_CodeCoverage_Util::percent($report->getNumTestedClassesAndTraits(), $report->getNumClassesAndTraits(), TRUE)
+          . ' (' . $report->getNumTestedClassesAndTraits() . '/' . $report->getNumClassesAndTraits() . ')' . PHP_EOL . $colors ['eol']
           . $colors['methods'] . $colors['eol'] . '  Methods: ' . PHP_CodeCoverage_Util::percent($report->getNumTestedMethods(), $report->getNumMethods(), TRUE)
           . ' (' . $report->getNumTestedMethods() . '/' . $report->getNumMethods() . ')' . PHP_EOL . $colors ['eol']
           . $colors['lines'] . $colors['eol'] . '  Lines:   ' . PHP_CodeCoverage_Util::percent($report->getNumExecutedLines(), $report->getNumExecutableLines(), TRUE)
@@ -149,7 +148,7 @@ class PHP_CodeCoverage_Report_Text
                 continue;
             }
 
-            $classes      = array_merge($item->getClasses(), $item->getTraits());
+            $classes      = $item->getClassesAndTraits();
             $coverage     = $item->getCoverageData();
             $lines        = array();
             $ignoredLines = $item->getIgnoredLines();
@@ -159,7 +158,7 @@ class PHP_CodeCoverage_Report_Text
                 $coveredClassStatements = 0;
                 $coveredMethods         = 0;
 
-                foreach ($class['methods'] as $methodName => $method) {
+                foreach ($class['methods'] as $method) {
                     $methodCount        = 0;
                     $methodLines        = 0;
                     $methodLinesCovered = 0;

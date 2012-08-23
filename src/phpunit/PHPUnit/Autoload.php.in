@@ -37,7 +37,7 @@
  * @package    PHPUnit
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.5.0
  */
@@ -87,18 +87,22 @@ function phpunit_autoload($class = NULL)
 
 spl_autoload_register('phpunit_autoload');
 
-if (PHPUnit_Util_Filesystem::fileExistsInIncludePath('PHP/Invoker/Autoload.php')) {
+if (stream_resolve_include_path('PHP/Invoker/Autoload.php')) {
     require_once 'PHP/Invoker/Autoload.php';
 }
 
-if (PHPUnit_Util_Filesystem::fileExistsInIncludePath('PHPUnit/Extensions/Database/Autoload.php')) {
+if (stream_resolve_include_path('PHPUnit/Extensions/Database/Autoload.php')) {
     require_once 'PHPUnit/Extensions/Database/Autoload.php';
 }
 
-if (PHPUnit_Util_Filesystem::fileExistsInIncludePath('PHPUnit/Extensions/SeleniumTestCase/Autoload.php')) {
+if (stream_resolve_include_path('PHPUnit/Extensions/SeleniumCommon/Autoload.php')) {
+    require_once 'PHPUnit/Extensions/SeleniumCommon/Autoload.php';
+}
+
+else if (stream_resolve_include_path('PHPUnit/Extensions/SeleniumTestCase/Autoload.php')) {
     require_once 'PHPUnit/Extensions/SeleniumTestCase/Autoload.php';
 }
 
-if (PHPUnit_Util_Filesystem::fileExistsInIncludePath('PHPUnit/Extensions/Story/Autoload.php')) {
+if (stream_resolve_include_path('PHPUnit/Extensions/Story/Autoload.php')) {
     require_once 'PHPUnit/Extensions/Story/Autoload.php';
 }

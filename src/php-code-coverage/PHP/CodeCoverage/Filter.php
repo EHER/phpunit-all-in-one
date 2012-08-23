@@ -38,7 +38,7 @@
  * @package    CodeCoverage
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.0.0
  */
@@ -50,8 +50,8 @@
  * @package    CodeCoverage
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 1.1.2
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.0.0
  */
@@ -78,7 +78,6 @@ class PHP_CodeCoverage_Filter
     public function __construct()
     {
         $functions = array(
-          'file_iterator_autoload',
           'php_codecoverage_autoload',
           'php_invoker_autoload',
           'php_timer_autoload',
@@ -97,20 +96,26 @@ class PHP_CodeCoverage_Filter
             }
         }
 
-        $file = PHP_CodeCoverage_Util::fileExistsInIncludePath(
-          'SymfonyComponents/YAML/sfYaml.php'
-        );
-
-        if ($file) {
-            $this->addFileToBlacklist($file);
-        }
-
-        $file = PHP_CodeCoverage_Util::fileExistsInIncludePath(
+        $files = array(
+          'Symfony/Component/Finder/Finder.php',
+          'Symfony/Component/Finder/Glob.php',
+          'Symfony/Component/Finder/Iterator/FilterIterator.php',
+          'Symfony/Component/Finder/Iterator/FileTypeFilterIterator.php',
+          'Symfony/Component/Finder/Iterator/FilenameFilterIterator.php',
+          'Symfony/Component/Finder/Iterator/RecursiveDirectoryIterator.php',
+          'Symfony/Component/Finder/Iterator/ExcludeDirectoryFilterIterator.php',
+          'Symfony/Component/Finder/Iterator/MultiplePcreFilterIterator.php',
+          'Symfony/Component/Finder/SplFileInfo.php',
+          'SymfonyComponents/YAML/sfYaml.php',
           'SymfonyComponents/YAML/sfYamlDumper.php'
         );
 
-        if ($file) {
-            $this->addFileToBlacklist($file);
+        foreach ($files as $file) {
+            $file = stream_resolve_include_path($file);
+
+            if ($file) {
+                $this->addFileToBlacklist($file);
+            }
         }
     }
 
@@ -123,12 +128,7 @@ class PHP_CodeCoverage_Filter
      */
     public function addDirectoryToBlacklist($directory, $suffix = '.php', $prefix = '')
     {
-        $facade = new File_Iterator_Facade;
-        $files  = $facade->getFilesAsArray(
-          $directory, $suffix, $prefix
-        );
-
-        foreach ($files as $file) {
+        foreach ($this->findFiles($directory, $prefix, $suffix) as $file) {
             $this->addFileToBlacklist($file);
         }
     }
@@ -164,12 +164,7 @@ class PHP_CodeCoverage_Filter
      */
     public function removeDirectoryFromBlacklist($directory, $suffix = '.php', $prefix = '')
     {
-        $facade = new File_Iterator_Facade;
-        $files  = $facade->getFilesAsArray(
-          $directory, $suffix, $prefix
-        );
-
-        foreach ($files as $file) {
+        foreach ($this->findFiles($directory, $prefix, $suffix) as $file) {
             $this->removeFileFromBlacklist($file);
         }
     }
@@ -197,12 +192,7 @@ class PHP_CodeCoverage_Filter
      */
     public function addDirectoryToWhitelist($directory, $suffix = '.php', $prefix = '')
     {
-        $facade = new File_Iterator_Facade;
-        $files  = $facade->getFilesAsArray(
-          $directory, $suffix, $prefix
-        );
-
-        foreach ($files as $file) {
+        foreach ($this->findFiles($directory, $prefix, $suffix) as $file) {
             $this->addFileToWhitelist($file);
         }
     }
@@ -241,12 +231,7 @@ class PHP_CodeCoverage_Filter
      */
     public function removeDirectoryFromWhitelist($directory, $suffix = '.php', $prefix = '')
     {
-        $facade = new File_Iterator_Facade;
-        $files  = $facade->getFilesAsArray(
-          $directory, $suffix, $prefix
-        );
-
-        foreach ($files as $file) {
+        foreach ($this->findFiles($directory, $prefix, $suffix) as $file) {
             $this->removeFileFromWhitelist($file);
         }
     }
@@ -293,12 +278,14 @@ class PHP_CodeCoverage_Filter
      * @param  string  $filename
      * @param  boolean $ignoreWhitelist
      * @return boolean
-     * @throws InvalidArgumentException
+     * @throws PHP_CodeCoverage_Exception
      */
     public function isFiltered($filename, $ignoreWhitelist = FALSE)
     {
         if (!is_bool($ignoreWhitelist)) {
-            throw new InvalidArgumentException;
+            throw PHP_CodeCoverage_Util_InvalidArgumentHelper::factory(
+              1, 'boolean'
+            );
         }
 
         $filename = realpath($filename);
@@ -339,5 +326,34 @@ class PHP_CodeCoverage_Filter
     public function hasWhitelist()
     {
         return !empty($this->whitelistedFiles);
+    }
+
+    /**
+     * @param  string $directory
+     * @param  string $prefix
+     * @param  string $suffix
+     * @return array
+     * @since  Method available since Release 1.2.0
+     */
+    protected function findFiles($directory, $prefix, $suffix)
+    {
+        $finder = new Symfony\Component\Finder\Finder;
+        $finder->in($directory);
+
+        if (!empty($prefix)) {
+            $finder->name($prefix . '*');
+        }
+
+        if (!empty($suffix)) {
+            $finder->name('*' . $suffix);
+        }
+
+        $files = array();
+
+        foreach ($finder as $file) {
+            $files[] = $file->getRealpath();
+        }
+
+        return $files;
     }
 }

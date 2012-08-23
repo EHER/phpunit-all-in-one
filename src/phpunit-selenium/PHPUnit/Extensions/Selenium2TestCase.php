@@ -51,7 +51,7 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.7
+ * @version    Release: 1.2.8
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.0
  * @method void acceptAlert() Press OK on an alert, or confirms a dialog
@@ -88,34 +88,49 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
     const VERSION = "1.2.7";
 
     /**
+     * @var string  override to provide code coverage data from the server
+     */
+    protected $coverageScriptUrl;
+
+    /**
      * @var PHPUnit_Extensions_Selenium2TestCase_Session
      */
     private $session;
 
     /**
-     * @var string
+     * @var array
      */
-    private $host = 'localhost';
-
-    /**
-     * @var int
-     */
-    private $port = 4444;
-
-    /**
-     * @var string
-     */
-    private $browser;
-
-    /**
-     * @var PHPUnit_Extensions_Selenium2TestCase_URL
-     */
-    private $browserUrl;
+    private $parameters;
 
     /**
      * @var PHPUnit_Extensions_Selenium2TestCase_SessionStrategy
      */
     private static $sessionStrategy;
+
+    /**
+     * @var PHPUnit_Extensions_Selenium2TestCase_SessionStrategy
+     */
+    private static $browserSessionStrategy;
+
+    /**
+     * @var PHPUnit_Extensions_Selenium2TestCase_SessionStrategy
+     */
+    private $localSessionStrategy;
+
+    /**
+     * @var array
+     */
+    private static $lastBrowserParams;
+
+    /**
+     * @var string
+     */
+    private $testId;
+
+    /**
+     * @var boolean
+     */
+    private $collectCodeCoverageInformation;
 
     /**
      * @param boolean
@@ -128,7 +143,6 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
         if (!$shareSession) {
             self::$sessionStrategy = self::defaultSessionStrategy();
         } else {
-            echo "Shared strategy\n";
             self::$sessionStrategy = new PHPUnit_Extensions_Selenium2TestCase_SessionStrategy_Shared(self::defaultSessionStrategy());
         }
     }
@@ -146,15 +160,101 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
         return new PHPUnit_Extensions_Selenium2TestCase_SessionStrategy_Isolated;
     }
 
+    public function __construct($name = NULL, array $data = array(), $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        $this->parameters = array(
+            'host' => 'localhost',
+            'port' => 4444,
+            'browser' => NULL,
+            'browserName' => NULL,
+            'desiredCapabilities' => array(),
+            'seleniumServerRequestsTimeout' => 60
+        );
+    }
+
+    public function setupSpecificBrowser($params)
+    {
+        $this->setUpSessionStrategy($params);
+        $params = array_merge($this->parameters, $params);
+        $this->setHost($params['host']);
+        $this->setPort($params['port']);
+        $this->setBrowser($params['browserName']);
+        $this->parameters['browser'] = $params['browser'];
+        $this->setDesiredCapabilities($params['desiredCapabilities']);
+        $this->setSeleniumServerRequestsTimeout(
+            $params['seleniumServerRequestsTimeout']);
+    }
+
+    private function setUpSessionStrategy($params)
+    {
+        // This logic enables us to have a session strategy reused for each
+        // item in self::$browsers. We don't want them both to share one
+        // and we don't want each test for a specific browser to have a
+        // new strategy
+        if ($params == self::$lastBrowserParams) {
+            // do nothing so we use the same session strategy for this
+            // browser
+        } elseif (isset($params['sessionStrategy'])) {
+            $strat = $params['sessionStrategy'];
+            if ($strat != "isolated" && $strat != "shared") {
+                throw new InvalidArgumentException("Session strategy must be either 'isolated' or 'shared'");
+            } elseif ($strat == "isolated") {
+                self::$browserSessionStrategy = new PHPUnit_Extensions_Selenium2TestCase_SessionStrategy_Isolated;
+            } else {
+                self::$browserSessionStrategy = new PHPUnit_Extensions_Selenium2TestCase_SessionStrategy_Shared(self::defaultSessionStrategy());
+            }
+        } else {
+            self::$browserSessionStrategy = self::defaultSessionStrategy();
+        }
+        self::$lastBrowserParams = $params;
+        $this->localSessionStrategy = self::$browserSessionStrategy;
+
+    }
+
+    private function getStrategy()
+    {
+        if ($this->localSessionStrategy)
+            return $this->localSessionStrategy;
+        else
+            return self::sessionStrategy();
+    }
+
     public function prepareSession()
     {
         if (!$this->session) {
-            $this->session = self::sessionStrategy()->session(array('host'      => $this->host,
-                                                                   'port'       => $this->port,
-                                                                   'browser'    => $this->browser,
-                                                                   'browserUrl' => $this->browserUrl));
+            $this->session = $this->getStrategy()->session($this->parameters);
         }
         return $this->session;
+    }
+
+    public function run(PHPUnit_Framework_TestResult $result = NULL)
+    {
+        $this->testId = get_class($this) . '__' . $this->getName();
+
+        if ($result === NULL) {
+            $result = $this->createResult();
+        }
+
+
+        $this->collectCodeCoverageInformation = $result->getCollectCodeCoverageInformation();
+
+        parent::run($result);
+
+        if ($this->collectCodeCoverageInformation) {
+            $coverage = new PHPUnit_Extensions_SeleniumCommon_RemoteCoverage(
+                $this->coverageScriptUrl,
+                $this->testId
+            );
+            $result->getCodeCoverage()->append(
+                $coverage->get(), $this
+            );
+        }
+
+        // do not call this before to give the time to the Listeners to run
+        $this->getStrategy()->endOfTest($this->session);
+
+        return $result;
     }
 
     /**
@@ -163,11 +263,17 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
     protected function runTest()
     {
         $this->prepareSession();
+        $this->url('');
 
         $thrownException = NULL;
 
+        if ($this->collectCodeCoverageInformation) {
+            $this->session->cookie()->remove('PHPUNIT_SELENIUM_TEST_ID');
+            $this->session->cookie()->add('PHPUNIT_SELENIUM_TEST_ID', $this->testId)->set();
+        }
+
         try {
-            parent::runTest();
+            $result = parent::runTest();
 
             if (!empty($this->verificationErrors)) {
                 $this->fail(implode("\n", $this->verificationErrors));
@@ -176,16 +282,23 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
             $thrownException = $e;
         }
 
-        self::sessionStrategy()->endOfTest($this->session);
 
         if (NULL !== $thrownException) {
             throw $thrownException;
         }
+
+        return $result;
+    }
+
+
+    public static function suite($className)
+    {
+        return PHPUnit_Extensions_SeleniumTestSuite::fromTestCaseClass($className);
     }
 
     public function onNotSuccessfulTest(Exception $e)
     {
-        self::sessionStrategy()->notSuccessfulTest();
+        $this->getStrategy()->notSuccessfulTest();
         parent::onNotSuccessfulTest($e);
     }
 
@@ -198,6 +311,9 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
      */
     public function __call($command, $arguments)
     {
+        if ($this->session === NULL) {
+            throw new PHPUnit_Extensions_Selenium2TestCase_Exception("There is currently no active session to execute the '$command' command. You're probably trying to set some option in setUp() with an incorrect setter name.");
+        }
         $result = call_user_func_array(
           array($this->session, $command), $arguments
         );
@@ -215,7 +331,7 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
             throw PHPUnit_Util_InvalidArgumentHelper::factory(1, 'string');
         }
 
-        $this->host = $host;
+        $this->parameters['host'] = $host;
     }
 
     /**
@@ -228,20 +344,25 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
             throw PHPUnit_Util_InvalidArgumentHelper::factory(1, 'integer');
         }
 
-        $this->port = $port;
+        $this->parameters['port'] = $port;
     }
 
     /**
      * @param  string $browser
      * @throws InvalidArgumentException
      */
-    public function setBrowser($browser)
+    public function setBrowser($browserName)
     {
-        if (!is_string($browser)) {
+        if (!is_string($browserName)) {
             throw PHPUnit_Util_InvalidArgumentHelper::factory(1, 'string');
         }
 
-        $this->browser = $browser;
+        $this->parameters['browserName'] = $browserName;
+    }
+
+    public function getBrowser()
+    {
+        return $this->parameters['browserName'];
     }
 
     /**
@@ -254,6 +375,22 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
             throw PHPUnit_Util_InvalidArgumentHelper::factory(1, 'string');
         }
 
-        $this->browserUrl = new PHPUnit_Extensions_Selenium2TestCase_URL($browserUrl);
+        $this->parameters['browserUrl'] = new PHPUnit_Extensions_Selenium2TestCase_URL($browserUrl);
+    }
+
+    /**
+     * @see http://code.google.com/p/selenium/wiki/JsonWireProtocol
+     */
+    public function setDesiredCapabilities(array $capabilities)
+    {
+        $this->parameters['desiredCapabilities'] = $capabilities;
+    }
+
+    /**
+     * @param int $timeout  seconds
+     */
+    public function setSeleniumServerRequestsTimeout($timeout)
+    {
+        $this->parameters['seleniumServerRequestsTimeout'] = $timeout;
     }
 }

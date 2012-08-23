@@ -49,7 +49,7 @@
  * @author     Mike Lively <m@digitalsandwich.com>
  * @copyright  2010 Mike Lively <m@digitalsandwich.com>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.1.2
+ * @version    Release: 1.2.0
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.0.0
  */
@@ -103,7 +103,8 @@ class PHPUnit_Extensions_Database_DataSet_Persistors_Yaml implements PHPUnit_Ext
         }
 
         file_put_contents(
-          $this->filename, sfYaml::dump($phpArr, 3) . $emptyTablesAsString
+          $this->filename,
+          Symfony\Component\Yaml\Yaml::dump($phpArr, 3) . $emptyTablesAsString
         );
     }
 }

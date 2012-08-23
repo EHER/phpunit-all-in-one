@@ -38,7 +38,7 @@
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.0.0
  */
@@ -50,8 +50,8 @@
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.6.11
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
@@ -78,37 +78,5 @@ class PHPUnit_Util_Filesystem
           DIRECTORY_SEPARATOR,
           $className
         ) . '.php';
-    }
-
-    /**
-     * Implementation of stream_resolve_include_path() in PHP
-     * for version before PHP 5.3.2.
-     *
-     * @param  string $file
-     * @return mixed
-     * @author Mattis Stordalen Flister <mattis@xait.no>
-     * @since  Method available since Release 3.2.9
-     */
-    public static function fileExistsInIncludePath($file)
-    {
-        if (function_exists('stream_resolve_include_path')) {
-            return stream_resolve_include_path($file);
-        }
-
-        if (file_exists($file)) {
-            return realpath($file);
-        }
-
-        $paths = explode(PATH_SEPARATOR, get_include_path());
-
-        foreach ($paths as $path) {
-            $fullpath = $path . DIRECTORY_SEPARATOR . $file;
-
-            if (file_exists($fullpath)) {
-                return realpath($fullpath);
-            }
-        }
-
-        return FALSE;
     }
 }

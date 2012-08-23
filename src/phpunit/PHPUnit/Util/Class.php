@@ -38,14 +38,10 @@
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.1.0
  */
-
-if (!defined('T_NAMESPACE')) {
-    define('T_NAMESPACE', 377);
-}
 
 /**
  * Class helpers.
@@ -54,8 +50,8 @@ if (!defined('T_NAMESPACE')) {
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.6.11
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.1.0
  */
@@ -247,7 +243,7 @@ class PHPUnit_Util_Class
      * @param  string  $className
      * @param  string  $attributeName
      * @return mixed
-     * @throws InvalidArgumentException
+     * @throws PHPUnit_Framework_Exception
      * @since  Method available since Release 3.4.0
      */
     public static function getStaticAttribute($className, $attributeName)
@@ -292,7 +288,7 @@ class PHPUnit_Util_Class
      * @param  object  $object
      * @param  string  $attributeName
      * @return mixed
-     * @throws InvalidArgumentException
+     * @throws PHPUnit_Framework_Exception
      * @since  Method available since Release 3.4.0
      */
     public static function getObjectAttribute($object, $attributeName)
@@ -324,64 +320,22 @@ class PHPUnit_Util_Class
         }
 
         if (isset($attribute)) {
-            if ($attribute == NULL || $attribute->isPublic()) {
+            if (!$attribute || $attribute->isPublic()) {
                 return $object->$attributeName;
-            } else {
-                $array         = (array)$object;
-                $protectedName = "\0*\0" . $attributeName;
-
-                if (array_key_exists($protectedName, $array)) {
-                    return $array[$protectedName];
-                } else {
-                    $classes = self::getHierarchy(get_class($object));
-
-                    foreach ($classes as $class) {
-                        $privateName = sprintf(
-                          "\0%s\0%s",
-
-                          $class,
-                          $attributeName
-                        );
-
-                        if (array_key_exists($privateName, $array)) {
-                            return $array[$privateName];
-                        }
-                    }
-                }
             }
+            $attribute->setAccessible(TRUE);
+            $value = $attribute->getValue($object);
+            $attribute->setAccessible(FALSE);
+
+            return $value;
         }
 
         throw new PHPUnit_Framework_Exception(
           sprintf(
             'Attribute "%s" not found in object.',
-
             $attributeName
           )
         );
-    }
-
-    /**
-     *
-     *
-     * @param  string $className
-     * @return array
-     * @since  Method available since Release 3.4.0
-     */
-    public static function parseFullyQualifiedClassName($className)
-    {
-        $result = array(
-          'namespace'               => '',
-          'className'               => $className,
-          'fullyQualifiedClassName' => $className
-        );
-
-        if (strpos($className, '\\') !== FALSE) {
-            $tmp                 = explode('\\', $className);
-            $result['className'] = $tmp[count($tmp)-1];
-            $result['namespace'] = self::arrayToName($tmp);
-        }
-
-        return $result;
     }
 
     /**

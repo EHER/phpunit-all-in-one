@@ -49,33 +49,40 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.7
+ * @version    Release: 1.2.8
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.0
  */
 class PHPUnit_Extensions_Selenium2TestCase_Driver
 {
-    /**
-     * @var string
-     */
-    private $browser;
+    private $seleniumServerUrl;
+    private $seleniumServerRequestsTimeout;
 
-    public function __construct(PHPUnit_Extensions_Selenium2TestCase_URL $seleniumServerUrl)
+    public function __construct(PHPUnit_Extensions_Selenium2TestCase_URL $seleniumServerUrl, $timeout = 60)
     {
         $this->seleniumServerUrl = $seleniumServerUrl;
+        $this->seleniumServerRequestsTimeout = $timeout;
     }
 
-    public function startSession($browser, PHPUnit_Extensions_Selenium2TestCase_URL $browserUrl)
+    public function startSession(array $desiredCapabilities, PHPUnit_Extensions_Selenium2TestCase_URL $browserUrl)
     {
-        $this->browser = $browser;
         $sessionCreation = $this->seleniumServerUrl->descend("/wd/hub/session");
         $response = $this->curl('POST', $sessionCreation, array(
-            'desiredCapabilities' => array(
-                'browserName' => $browser
-            )
+            'desiredCapabilities' => $desiredCapabilities
         ));
         $sessionPrefix = $response->getURL();
-        return new PHPUnit_Extensions_Selenium2TestCase_Session($this, $sessionPrefix, $browserUrl);
+
+        $timeouts = new PHPUnit_Extensions_Selenium2TestCase_Session_Timeouts(
+            $this,
+            $sessionPrefix->descend('timeouts'),
+            $this->seleniumServerRequestsTimeout * 1000
+        );
+        return new PHPUnit_Extensions_Selenium2TestCase_Session(
+            $this,
+            $sessionPrefix,
+            $browserUrl, 
+            $timeouts
+        );
     }
 
     /**
@@ -90,7 +97,7 @@ class PHPUnit_Extensions_Selenium2TestCase_Driver
                          $params = NULL)
     {
         $curl = curl_init($url->getValue());
-        curl_setopt($curl, CURLOPT_TIMEOUT, 60);
+        curl_setopt($curl, CURLOPT_TIMEOUT, $this->seleniumServerRequestsTimeout);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
         curl_setopt($curl,
                     CURLOPT_HTTPHEADER,
@@ -112,9 +119,7 @@ class PHPUnit_Extensions_Selenium2TestCase_Driver
         $rawResponse = trim(curl_exec($curl));
         $info = curl_getinfo($curl);
         if ($info['http_code'] == 404) {
-            if ($this->isNotAnAndroidDriverErrorToWorkAround($info)) {
-                throw new BadMethodCallException("The command $url is not recognized by the server.");
-            }
+            throw new BadMethodCallException("The command $url is not recognized by the server.");
         }
         curl_close($curl);
         $content = json_decode($rawResponse, TRUE);
@@ -122,7 +127,7 @@ class PHPUnit_Extensions_Selenium2TestCase_Driver
             if (isset($content['value']['message'])) {
                 $message = $content['value']['message'];
             } else {
-                $message = "Internal server error while executing $http_method request at $url";
+                $message = "Internal server error while executing $http_method request at $url. Response: " . var_export($content, TRUE);
             }
             throw new RuntimeException($message);
         }
@@ -134,17 +139,5 @@ class PHPUnit_Extensions_Selenium2TestCase_Driver
         return $this->curl($command->httpMethod(),
                            $command->url(),
                            $command->jsonParameters());
-    }
-
-    /**
-     * TODO: how to test this automatically?
-     * @return boolean
-     */
-    private function isNotAnAndroidDriverErrorToWorkAround(array $info)
-    {
-        if ($this->browser == 'android'
-         && preg_match('/wd\/hub\/session\/[0-9]*/', $info['url'])) {
-            return FALSE;
-        }
     }
 }

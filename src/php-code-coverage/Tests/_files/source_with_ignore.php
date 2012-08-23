@@ -24,3 +24,15 @@ class Bar
     {
     }
 }
+
+function baz()
+{
+    print '*'; // @codeCoverageIgnore
+}
+
+interface Bor {
+
+    public function foo();
+
+}
+

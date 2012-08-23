@@ -37,26 +37,27 @@
  * @package    PHPUnit
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 2.0.0
  */
 
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Error.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ExceptionInAssertPostConditionsTest.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ExceptionInAssertPreConditionsTest.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ExceptionInSetUpTest.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ExceptionInTearDownTest.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ExceptionInTest.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Failure.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'NoArgTestCaseTest.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'OutputTestCase.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'RequirementsTest.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Singleton.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Success.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ThrowExceptionTestCase.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ThrowNoExceptionTestCase.php';
-require_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'WasRun.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Error.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ExceptionInAssertPostConditionsTest.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ExceptionInAssertPreConditionsTest.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ExceptionInSetUpTest.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ExceptionInTearDownTest.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ExceptionInTest.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Failure.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'NoArgTestCaseTest.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'OutputTestCase.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'RequirementsTest.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Singleton.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'Success.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ThrowExceptionTestCase.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ThrowNoExceptionTestCase.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'WasRun.php';
+require_once dirname(__DIR__) . DIRECTORY_SEPARATOR . '_files' . DIRECTORY_SEPARATOR . 'ChangeCurrentWorkingDirectoryTest.php';
 
 $GLOBALS['a']  = 'a';
 $_ENV['b']     = 'b';
@@ -74,8 +75,8 @@ $GLOBALS['i']  = 'i';
  * @package    PHPUnit
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.6.11
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
@@ -305,19 +306,11 @@ class Framework_TestCaseTest extends PHPUnit_Framework_TestCase
      */
     public function testStaticAttributesBackupPre()
     {
-        if (!version_compare(PHP_VERSION, '5.3', '>')) {
-            $this->markTestSkipped('PHP 5.3 (or later) is required.');
-        }
-
         $GLOBALS['singleton'] = Singleton::getInstance();
     }
 
     public function testStaticAttributesBackupPost()
     {
-        if (!version_compare(PHP_VERSION, '5.3', '>')) {
-            $this->markTestSkipped('PHP 5.3 (or later) is required.');
-        }
-
         $this->assertNotSame($GLOBALS['singleton'], Singleton::getInstance());
     }
 
@@ -380,4 +373,68 @@ class Framework_TestCaseTest extends PHPUnit_Framework_TestCase
           $test->getStatusMessage()
         );
     }
+
+    public function testSkipsIfRequiresNonExistingFunction()
+    {
+        $test   = new RequirementsTest('testNine');
+        $result = $test->run();
+
+        $this->assertEquals(1, $result->skippedCount());
+        $this->assertEquals(
+          'Function testFunc is required.',
+          $test->getStatusMessage()
+        );
+    }
+
+    public function testSkipsIfRequiresNonExistingExtension()
+    {
+        $test   = new RequirementsTest('testTen');
+        $result = $test->run();
+
+        $this->assertEquals(
+          'Extension testExt is required.',
+          $test->getStatusMessage()
+        );
+    }
+
+    public function testSkipsProvidesMessagesForAllSkippingReasons()
+    {
+        $test   = new RequirementsTest('testAllPossibleRequirements');
+        $result = $test->run();
+
+        $this->assertEquals(
+          'PHP 99-dev (or later) is required.' . PHP_EOL .
+          'PHPUnit 9-dev (or later) is required.' . PHP_EOL .
+          'Function testFuncOne is required.' . PHP_EOL .
+          'Function testFuncTwo is required.' . PHP_EOL .
+          'Extension testExtOne is required.' . PHP_EOL .
+          'Extension testExtTwo is required.',
+          $test->getStatusMessage()
+        );
+    }
+
+    public function testRequiringAnExistingFunctionDoesNotSkip()
+    {
+        $test   = new RequirementsTest('testExistingFunction');
+        $result = $test->run();
+        $this->assertEquals(0, $result->skippedCount());
+    }
+
+    public function testRequiringAnExistingExtensionDoesNotSkip()
+    {
+        $test   = new RequirementsTest('testExistingExtension');
+        $result = $test->run();
+        $this->assertEquals(0, $result->skippedCount());
+    }
+
+    public function testCurrentWorkingDirectoryIsRestored()
+    {
+        $expectedCwd = getcwd();
+
+        $test = new ChangeCurrentWorkingDirectoryTest('testSomethingThatChangesTheCwd');
+        $test->run();
+
+        $this->assertSame($expectedCwd, getcwd());
+    }
+
 }

@@ -42,10 +42,6 @@
  * @since      File available since Release 1.0.0
  */
 
-if (!class_exists('sfYaml', FALSE)) {
-    require_once 'SymfonyComponents/YAML/sfYaml.php';
-}
-
 /**
  * Creates CsvDataSets.
  *
@@ -55,7 +51,7 @@ if (!class_exists('sfYaml', FALSE)) {
  * @author     Mike Lively <m@digitalsandwich.com>
  * @copyright  2010 Mike Lively <m@digitalsandwich.com>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.1.2
+ * @version    Release: 1.2.0
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.0.0
  */
@@ -84,7 +80,7 @@ class PHPUnit_Extensions_Database_DataSet_YamlDataSet extends PHPUnit_Extensions
      */
     public function addYamlFile($yamlFile)
     {
-        $data = sfYaml::load($yamlFile);
+        $data = Symfony\Component\Yaml\Yaml::parse($yamlFile);
 
         foreach ($data as $tableName => $rows) {
             if (!isset($rows)) {

@@ -20,11 +20,11 @@ Add ["EHER/PHPUnit"](http://packagist.org/packages/EHER/PHPUnit) package to your
     {
         "require": {
             "php":          ">=5.3.2",
-            "EHER/PHPUnit": ">=1.2"
+            "zerkalica/PHPUnit": ">=1.2"
         }
     }
 
 After install/update vendors with Composer, you can simply run
 
-    php vendor/EHER/PHPUnit/phpunit.php
+    php vendor/zerkalica/PHPUnit/phpunit.php
 

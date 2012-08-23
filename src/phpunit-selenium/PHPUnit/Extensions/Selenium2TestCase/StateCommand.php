@@ -49,7 +49,7 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.7
+ * @version    Release: 1.2.8
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.5
  */

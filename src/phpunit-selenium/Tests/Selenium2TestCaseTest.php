@@ -39,7 +39,6 @@
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
- * @since      File available since Release 1.0.0
  */
 
 /**
@@ -49,9 +48,7 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.7
  * @link       http://www.phpunit.de/
- * @since      Class available since Release 1.0.0
  */
 class Extensions_Selenium2TestCaseTest extends Tests_Selenium2TestCase_BaseTestCase
 {
@@ -198,7 +195,7 @@ class Extensions_Selenium2TestCaseTest extends Tests_Selenium2TestCase_BaseTestC
     {
         $this->url('html/test_geometry.html');
         $element = $this->byId('colored');
-        $this->assertEquals('rgb(0, 0, 255)', $element->css('background-color'));
+        $this->assertEquals('rgba(0,0,255,1)', $element->css('background-color'));
     }
 
     public function testClick()
@@ -230,6 +227,14 @@ class Extensions_Selenium2TestCaseTest extends Tests_Selenium2TestCase_BaseTestC
         $withOnClick = $this->byId('linkWithOnclickReturnsFalse');
         $withOnClick->click();
         $this->assertEquals('Click Page 1', $this->title());
+    }
+
+    public function testByLinkText()
+    {
+        $this->url('html/test_click_page1.html');
+        $link = $this->byLinkText('Click here for next page');
+        $link->click();
+        $this->assertEquals('Click Page Target', $this->title());
     }
 
     public function testClicksOnJavaScriptHref()
@@ -466,7 +471,8 @@ class Extensions_Selenium2TestCaseTest extends Tests_Selenium2TestCase_BaseTestC
         $eventLog = $this->byId('eventlog');
         $this->assertEquals('', $eventLog->value());
         $this->clickOnElement('theButton');
-        $this->assertContains('{focus(theButton)} {click(theButton)}', $eventLog->value());
+        $this->assertContains('{focus(theButton)}', $eventLog->value());
+        $this->assertContains('{click(theButton)}', $eventLog->value());
         $eventLog->clear();
 
         $this->clickOnElement('theSubmit');
@@ -816,16 +822,14 @@ class Extensions_Selenium2TestCaseTest extends Tests_Selenium2TestCase_BaseTestC
         $this->click();
     }
 
-    public function testMouseButtonsCanBeHeld()
+    public function testMouseButtonsCanBeHeldAndReleasedOverAnElement()
     {
-        $this->markTestIncomplete();
-        $this->moveTo(array(
-            'element' => 'id', // or Element object
-            'xoffset' => 0,
-            'yofsset' => 0
-        ));
-        $this->buttonDown();
-        $this->buttonUp();
+        $this->url('html/movements.html');
+        $this->moveto($this->byId('to_move'));
+        $this->buttondown();
+        $this->moveto($this->byId('target'));
+        $this->buttonup();
+        $this->markTestIncomplete('Should write something in the input, but while manually drag and drop does work, it doesn\'t with this commands.');
     }
 
     public function testMouseButtonsCanBeClickedMultipleTimes()

@@ -39,7 +39,7 @@
  * @subpackage Tests
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.0.0
  */
@@ -60,8 +60,8 @@ if (!defined('TEST_FILES_PATH')) {
  * @subpackage Tests
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 1.1.2
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.0.0
  */
@@ -85,13 +85,17 @@ class PHP_CodeCoverage_FilterTest extends PHPUnit_Framework_TestCase
           TEST_FILES_PATH . 'CoverageNotPrivateTest.php',
           TEST_FILES_PATH . 'CoverageNotProtectedTest.php',
           TEST_FILES_PATH . 'CoverageNotPublicTest.php',
+          TEST_FILES_PATH . 'CoverageNothingTest.php',
           TEST_FILES_PATH . 'CoveragePrivateTest.php',
           TEST_FILES_PATH . 'CoverageProtectedTest.php',
           TEST_FILES_PATH . 'CoveragePublicTest.php',
+          TEST_FILES_PATH . 'CoverageTwoDefaultClassAnnotations.php',
           TEST_FILES_PATH . 'CoveredClass.php',
           TEST_FILES_PATH . 'CoveredFunction.php',
           TEST_FILES_PATH . 'NamespaceCoverageClassExtendedTest.php',
           TEST_FILES_PATH . 'NamespaceCoverageClassTest.php',
+          TEST_FILES_PATH . 'NamespaceCoverageCoversClassPublicTest.php',
+          TEST_FILES_PATH . 'NamespaceCoverageCoversClassTest.php',
           TEST_FILES_PATH . 'NamespaceCoverageMethodTest.php',
           TEST_FILES_PATH . 'NamespaceCoverageNotPrivateTest.php',
           TEST_FILES_PATH . 'NamespaceCoverageNotProtectedTest.php',
@@ -154,12 +158,9 @@ class PHP_CodeCoverage_FilterTest extends PHPUnit_Framework_TestCase
      */
     public function testAddingFilesToTheBlacklistWorks()
     {
-        $facade = new File_Iterator_Facade;
-        $files  = $facade->getFilesAsArray(
-          TEST_FILES_PATH, $suffixes = '.php'
+        $this->filter->addFilesToBlacklist(
+          $this->findFiles(TEST_FILES_PATH, '', '.php')
         );
-
-        $this->filter->addFilesToBlacklist($files);
 
         $blacklist = $this->filter->getBlacklist();
         sort($blacklist);
@@ -226,12 +227,9 @@ class PHP_CodeCoverage_FilterTest extends PHPUnit_Framework_TestCase
      */
     public function testAddingFilesToTheWhitelistWorks()
     {
-        $facade = new File_Iterator_Facade;
-        $files  = $facade->getFilesAsArray(
-          TEST_FILES_PATH, $suffixes = '.php'
+        $this->filter->addFilesToWhitelist(
+          $this->findFiles(TEST_FILES_PATH, '', '.php')
         );
-
-        $this->filter->addFilesToWhitelist($files);
 
         $whitelist = $this->filter->getWhitelist();
         sort($whitelist);
@@ -293,10 +291,32 @@ class PHP_CodeCoverage_FilterTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers            PHP_CodeCoverage_Filter::isFiltered
-     * @expectedException InvalidArgumentException
+     * @expectedException PHP_CodeCoverage_Exception
      */
     public function testIsFilteredThrowsExceptionForInvalidArgument()
     {
         $this->filter->isFiltered('foo', array(), NULL);
+    }
+
+    protected function findFiles($directory, $prefix, $suffix)
+    {
+        $finder = new Symfony\Component\Finder\Finder;
+        $finder->in($directory);
+
+        if (!empty($prefix)) {
+            $finder->name($prefix . '*');
+        }
+
+        if (!empty($suffix)) {
+            $finder->name('*' . $suffix);
+        }
+
+        $files = array();
+
+        foreach ($finder as $file) {
+            $files[] = $file->getRealpath();
+        }
+
+        return $files;
     }
 }

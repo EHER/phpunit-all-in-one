@@ -38,7 +38,7 @@
  * @subpackage Runner
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 2.0.0
  */
@@ -50,8 +50,8 @@
  * @subpackage Runner
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.6.11
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
@@ -81,15 +81,16 @@ abstract class PHPUnit_Runner_BaseTestRunner
      *
      * @param  string  $suiteClassName
      * @param  string  $suiteClassFile
+     * @param  mixed   $suffixes
      * @return PHPUnit_Framework_Test
      */
-    public function getTest($suiteClassName, $suiteClassFile = '')
+    public function getTest($suiteClassName, $suiteClassFile = '', $suffixes = '')
     {
         if (is_dir($suiteClassName) &&
             !is_file($suiteClassName . '.php') && empty($suiteClassFile)) {
             $facade = new File_Iterator_Facade;
             $files  = $facade->getFilesAsArray(
-              $suiteClassName, array('Test.php', '.phpt')
+              $suiteClassName, $suffixes
             );
 
             $suite = new PHPUnit_Framework_TestSuite($suiteClassName);
@@ -142,7 +143,7 @@ abstract class PHPUnit_Runner_BaseTestRunner
                 $test = new PHPUnit_Framework_TestSuite($testClass);
             }
 
-            catch (InvalidArgumentException $e) {
+            catch (PHPUnit_Framework_Exception $e) {
                 $test = new PHPUnit_Framework_TestSuite;
                 $test->setName($suiteClassName);
             }

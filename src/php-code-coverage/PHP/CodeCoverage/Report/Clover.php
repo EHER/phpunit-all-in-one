@@ -38,7 +38,7 @@
  * @package    CodeCoverage
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.0.0
  */
@@ -50,8 +50,8 @@
  * @package    CodeCoverage
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 1.1.2
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.0.0
  */
@@ -95,7 +95,7 @@ class PHP_CodeCoverage_Report_Clover
             $xmlFile = $xmlDocument->createElement('file');
             $xmlFile->setAttribute('name', $item->getPath());
 
-            $classes      = array_merge($item->getClasses(), $item->getTraits());
+            $classes      = $item->getClassesAndTraits();
             $coverage     = $item->getCoverageData();
             $lines        = array();
             $ignoredLines = $item->getIgnoredLines();
@@ -153,13 +153,7 @@ class PHP_CodeCoverage_Report_Clover
 
                     $lines[$method['startLine']] = array(
                       'count' => $methodCount,
-                      'crap'  => PHP_CodeCoverage_Util::crap(
-                                   $method['ccn'],
-                                   PHP_CodeCoverage_Util::percent(
-                                     $methodLinesCovered,
-                                     $methodLines
-                                   )
-                                 ),
+                      'crap'  => $method['crap'],
                       'type'  => 'method',
                       'name'  => $methodName
                     );
@@ -262,7 +256,7 @@ class PHP_CodeCoverage_Report_Clover
             $xmlMetrics = $xmlDocument->createElement('metrics');
             $xmlMetrics->setAttribute('loc', $linesOfCode['loc']);
             $xmlMetrics->setAttribute('ncloc', $linesOfCode['ncloc']);
-            $xmlMetrics->setAttribute('classes', $item->getNumClasses());
+            $xmlMetrics->setAttribute('classes', $item->getNumClassesAndTraits());
             $xmlMetrics->setAttribute('methods', $item->getNumMethods());
             $xmlMetrics->setAttribute(
               'coveredmethods', $item->getNumTestedMethods()
@@ -312,7 +306,7 @@ class PHP_CodeCoverage_Report_Clover
         $xmlMetrics->setAttribute('loc', $linesOfCode['loc']);
         $xmlMetrics->setAttribute('ncloc', $linesOfCode['ncloc']);
         $xmlMetrics->setAttribute(
-          'classes', $report->getNumClasses()
+          'classes', $report->getNumClassesAndTraits()
         );
         $xmlMetrics->setAttribute('methods', $report->getNumMethods());
         $xmlMetrics->setAttribute(

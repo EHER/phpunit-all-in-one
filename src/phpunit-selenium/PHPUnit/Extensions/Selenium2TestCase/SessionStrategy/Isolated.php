@@ -49,7 +49,7 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.7
+ * @version    Release: 1.2.8
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.6
  */
@@ -59,8 +59,12 @@ class PHPUnit_Extensions_Selenium2TestCase_SessionStrategy_Isolated
     public function session(array $parameters)
     {
         $seleniumServerUrl = PHPUnit_Extensions_Selenium2TestCase_URL::fromHostAndPort($parameters['host'], $parameters['port']);
-        $driver = new PHPUnit_Extensions_Selenium2TestCase_Driver($seleniumServerUrl);
-        $session = $driver->startSession($parameters['browser'], $parameters['browserUrl']);
+        $driver = new PHPUnit_Extensions_Selenium2TestCase_Driver($seleniumServerUrl, $parameters['seleniumServerRequestsTimeout']);
+        $capabilities = array_merge($parameters['desiredCapabilities'],
+                                    array(
+                                        'browserName' => $parameters['browserName']
+                                    ));
+        $session = $driver->startSession($capabilities, $parameters['browserUrl']);
         return $session;
     }
 
@@ -68,8 +72,10 @@ class PHPUnit_Extensions_Selenium2TestCase_SessionStrategy_Isolated
     {
     }
 
-    public function endOfTest(PHPUnit_Extensions_Selenium2TestCase_Session $session)
+    public function endOfTest(PHPUnit_Extensions_Selenium2TestCase_Session $session = NULL)
     {
-        $session->stop();
+        if ($session !== NULL) {
+            $session->stop();
+        }
     }
 }

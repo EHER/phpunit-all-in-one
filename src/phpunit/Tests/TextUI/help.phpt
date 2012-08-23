@@ -29,9 +29,12 @@ Usage: phpunit [switches] UnitTest [UnitTest.php]
   --testdox-text <file>     Write agile documentation in Text format to file.
 
   --filter <pattern>        Filter which tests to run.
+  --testsuite <pattern>     Filter which testsuite to run.
   --group ...               Only runs tests from the specified group(s).
   --exclude-group ...       Exclude tests from the specified group(s).
   --list-groups             List available test groups.
+  --test-suffix ...         Only search for test in files with specified
+                            suffix(es). Default: Test.php,.phpt
 
   --loader <loader>         TestSuiteLoader implementation to use.
   --printer <printer>       TestSuiteListener implementation to use.
@@ -62,5 +65,3 @@ Usage: phpunit [switches] UnitTest [UnitTest.php]
 
   -h|--help                 Prints this usage information.
   --version                 Prints the version and exits.
-
-  --debug                   Output debugging information.

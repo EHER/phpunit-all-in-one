@@ -50,7 +50,7 @@
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2010-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.7
+ * @version    Release: 1.2.8
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.0.0
  *
@@ -781,6 +781,7 @@ abstract class PHPUnit_Extensions_SeleniumTestCase extends PHPUnit_Framework_Tes
             $result = parent::runTest();
         } else {
             $this->runSelenese($this->getName(FALSE));
+            $result = NULL;
         }
 
         if (!empty($this->verificationErrors)) {
@@ -1076,88 +1077,11 @@ abstract class PHPUnit_Extensions_SeleniumTestCase extends PHPUnit_Framework_Tes
      */
     protected function getCodeCoverage()
     {
-        if (!empty($this->coverageScriptUrl)) {
-            $url = sprintf(
-              '%s?PHPUNIT_SELENIUM_TEST_ID=%s',
-              $this->coverageScriptUrl,
-              $this->testId
-            );
-
-            $buffer = @file_get_contents($url);
-
-            if ($buffer !== FALSE) {
-                $coverageData = unserialize($buffer);
-                if (is_array($coverageData)) {
-                    return $this->matchLocalAndRemotePaths($coverageData);
-                } else {
-                    throw new Exception('Empty or invalid code coverage data received from url "' . $url . '"');
-                }
-            }
-        }
-
-        return array();
-    }
-
-    /**
-     * @param  array $coverage
-     * @return array
-     * @author Mattis Stordalen Flister <mattis@xait.no>
-     */
-    protected function matchLocalAndRemotePaths(array $coverage)
-    {
-        $coverageWithLocalPaths = array();
-
-        foreach ($coverage as $originalRemotePath => $data) {
-            $remotePath = $originalRemotePath;
-            $separator  = $this->findDirectorySeparator($remotePath);
-
-            while (!($localpath = PHPUnit_Util_Filesystem::fileExistsInIncludePath($remotePath)) &&
-                   strpos($remotePath, $separator) !== FALSE) {
-                $remotePath = substr($remotePath, strpos($remotePath, $separator) + 1);
-            }
-
-            if ($localpath && md5_file($localpath) == $data['md5']) {
-                $coverageWithLocalPaths[$localpath] = $data['coverage'];
-            }
-        }
-
-        return $coverageWithLocalPaths;
-    }
-
-    /**
-     * @param  string $path
-     * @return string
-     * @author Mattis Stordalen Flister <mattis@xait.no>
-     */
-    protected function findDirectorySeparator($path)
-    {
-        if (strpos($path, '/') !== FALSE) {
-            return '/';
-        }
-
-        return '\\';
-    }
-
-    /**
-     * @param  string $path
-     * @return array
-     * @author Mattis Stordalen Flister <mattis@xait.no>
-     */
-    protected function explodeDirectories($path)
-    {
-        return explode($this->findDirectorySeparator($path), dirname($path));
-    }
-
-    /**
-     * @param  string $directory
-     * @param  string $suffix
-     * @return array
-     */
-    protected static function getSeleneseFiles($directory, $suffix)
-    {
-        $facade = new File_Iterator_Facade;
-
-        return $facade->getFilesAsArray($directory, $suffix);
+        $coverage = new PHPUnit_Extensions_SeleniumCommon_RemoteCoverage(
+            $this->coverageScriptUrl,
+            $this->testId
+        );
+        return $coverage->get();
     }
 
     /**
@@ -1185,11 +1109,12 @@ abstract class PHPUnit_Extensions_SeleniumTestCase extends PHPUnit_Framework_Tes
 
         try {
             $this->restoreSessionStateAfterFailedTest();
-
-            $buffer  = 'Current URL: ' . $this->drivers[0]->getLocation() .
-                       "\n";
+            $buffer = '';
 
             if ($this->captureScreenshotOnFailure) {
+                $buffer .= 'Current URL: ' . $this->drivers[0]->getLocation() .
+                       "\n";
+
                 $screenshotInfo = $this->takeScreenshot();
                 if ($screenshotInfo != '') {
                     $buffer .= $screenshotInfo;

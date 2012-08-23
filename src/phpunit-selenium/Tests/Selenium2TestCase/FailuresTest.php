@@ -39,7 +39,6 @@
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
- * @since      File available since Release 1.1.2
  */
 
 /**
@@ -49,26 +48,10 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.7
  * @link       http://www.phpunit.de/
- * @since      Class available since Release 1.2.0
  */
-class Extensions_Selenium2TestCaseFailuresTest extends PHPUnit_Extensions_Selenium2TestCase
+class Extensions_Selenium2TestCaseFailuresTest extends Tests_Selenium2TestCase_BaseTestCase
 {
-    public function setUp()
-    {
-        if (version_compare(phpversion(), '5.3.0', '<')) {
-            $this->markTestSkipped('Functionality available only under PHP 5.3.');
-        }
-        $this->setHost(PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_HOST);
-        $this->setPort((int)PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_PORT);
-        $this->setBrowser(PHPUNIT_TESTSUITE_EXTENSION_SELENIUM2_BROWSER);
-        if (!defined('PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_TESTS_URL')) {
-            $this->markTestSkipped("You must serve the selenium-1-tests folder from an HTTP server and configure the PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_TESTS_URL constant accordingly.");
-        }
-        $this->setBrowserUrl(PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_TESTS_URL);
-    }
-
     /**
      * @expectedException BadMethodCallException
      */
@@ -105,5 +88,15 @@ class Extensions_Selenium2TestCaseFailuresTest extends PHPUnit_Extensions_Seleni
         } catch (RuntimeException $e) {
             $this->assertContains('http://seleniumhq.org/exceptions/stale_element_reference.html', $e->getMessage());
         }
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testSelectObjectsCanOnlyBeCreatedOverSelectTags()
+    {
+        $this->url('html/test_element_selection.html');
+        $div = $this->byId('theDivId');
+        $select = $this->select($div);
     }
 }

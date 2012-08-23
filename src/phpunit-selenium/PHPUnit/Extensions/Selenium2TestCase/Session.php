@@ -49,15 +49,15 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.7
+ * @version    Release: 1.2.8
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.0
  * @method void acceptAlert() Press OK on an alert, or confirms a dialog
  * @method mixed alertText($value = NULL) Gets the alert dialog text, or sets the text for a prompt dialog
  * @method void back()
  * @method void dismissAlert() Press Cancel on an alert, or does not confirm a dialog
- * @method string execute($javaScriptCode) Injects arbitrary JavaScript in the page and returns the last
- * @method string executeAsync($javaScriptCode) Injects arbitrary JavaScript and wait for the callback (last element of arguments) to be called
+ * @method string execute(array $javaScriptCode) Injects arbitrary JavaScript in the page and returns the last. See unit tests for usage
+ * @method string executeAsync(array $javaScriptCode) Injects arbitrary JavaScript and wait for the callback (last element of arguments) to be called. See unit tests for usage
  * @method void forward()
  * @method void frame($elementId) Changes the focus to a frame in the page
  * @method void refresh()
@@ -79,16 +79,31 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
     private $baseUrl;
 
     /**
+     * @var PHPUnit_Extensions_Selenium2TestCase_Session_Timeouts
+     */
+    private $timeouts;
+
+    /**
      * @var boolean
      */
     private $stopped = FALSE;
 
     public function __construct($driver,
                                 PHPUnit_Extensions_Selenium2TestCase_URL $url,
-                                PHPUnit_Extensions_Selenium2TestCase_URL $baseUrl)
+                                PHPUnit_Extensions_Selenium2TestCase_URL $baseUrl,
+                                PHPUnit_Extensions_Selenium2TestCase_Session_Timeouts $timeouts)
     {
         $this->baseUrl = $baseUrl;
+        $this->timeouts = $timeouts;
         parent::__construct($driver, $url);
+    }
+
+    /**
+     * @return string
+     */
+    public function id()
+    {
+        return $this->url->lastSegment();
     }
 
     protected function initCommands()
@@ -98,11 +113,15 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
             'acceptAlert' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_AcceptAlert',
             'alertText' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_AlertText',
             'back' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
+            'buttondown' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
+            'buttonup' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
             'dismissAlert' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_DismissAlert',
             'execute' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
             'executeAsync' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
             'forward' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
             'frame' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Frame',
+            'keys' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Keys',
+            'moveto' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_MoveTo',
             'refresh' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
             'screenshot' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericAccessor',
             'source' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_GenericAccessor',
@@ -113,7 +132,6 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
             'window' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Window',
             'windowHandle' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_GenericAccessor',
             'windowHandles' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_GenericAccessor',
-            'keys' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Keys'
         );
     }
 
@@ -201,6 +219,15 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
     }
 
     /**
+     * @param string $value     e.g. 'Link text'
+     * @return PHPUnit_Extensions_Selenium2TestCase_Element
+     */
+    public function byLinkText($value)
+    {
+        return $this->by('link text', $value);
+    }
+
+    /**
      * @param string $strategy     supported by JsonWireProtocol element/ command
      * @param string $value
      * @return PHPUnit_Extensions_Selenium2TestCase_Element
@@ -248,6 +275,10 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
      */
     public function select(PHPUnit_Extensions_Selenium2TestCase_Element $element)
     {
+        $tag = $element->name();
+        if ($tag !== 'select') {
+            throw new InvalidArgumentException("The element is not a `select` tag but a `$tag`.");
+        }
         return PHPUnit_Extensions_Selenium2TestCase_Element_Select::fromElement($element);
     }
 
@@ -262,8 +293,7 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
 
     public function timeouts()
     {
-        return new PHPUnit_Extensions_Selenium2TestCase_Session_Timeouts($this->driver,
-                                                                         $this->url->descend('timeouts'));
+        return $this->timeouts;
     }
 
     /**

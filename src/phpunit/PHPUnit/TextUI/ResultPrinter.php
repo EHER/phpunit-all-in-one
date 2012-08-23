@@ -38,7 +38,7 @@
  * @subpackage TextUI
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 2.0.0
  */
@@ -50,8 +50,8 @@
  * @subpackage TextUI
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.6.11
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
@@ -119,7 +119,7 @@ class PHPUnit_TextUI_ResultPrinter extends PHPUnit_Util_Printer implements PHPUn
      * @param  boolean $verbose
      * @param  boolean $colors
      * @param  boolean $debug
-     * @throws InvalidArgumentException
+     * @throws PHPUnit_Framework_Exception
      * @since  Method available since Release 3.0.0
      */
     public function __construct($out = NULL, $verbose = FALSE, $colors = FALSE, $debug = FALSE)
@@ -274,6 +274,17 @@ class PHPUnit_TextUI_ResultPrinter extends PHPUnit_Util_Printer implements PHPUn
             $defect->thrownException()
           )
         );
+        
+        $e = $defect->thrownException()->getPrevious();                
+        while ($e) {
+            $this->write(
+                "\nCaused by\n" .
+                PHPUnit_Framework_TestFailure::exceptionToString($e). "\n" .
+                PHPUnit_Util_Filter::getFilteredStacktrace($e)
+            );
+            $e = $e->getPrevious();
+        }        
+        
     }
 
     /**

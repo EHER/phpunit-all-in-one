@@ -39,7 +39,6 @@
  * @copyright  2010-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
- * @since      File available since Release 1.2.4
  */
 
 /**
@@ -49,9 +48,7 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.7
  * @link       http://www.phpunit.de/
- * @since      Class available since Release 1.2.4
  */
 class Extensions_SeleniumTestCaseMultipleBrowsersTest extends PHPUnit_Extensions_SeleniumTestCase
 {
@@ -61,12 +58,21 @@ class Extensions_SeleniumTestCaseMultipleBrowsersTest extends PHPUnit_Extensions
             'browser' => '*firefox',
             'host'    => 'localhost',
             'port'    => 4444
+        ),
+        array(
+            'browser' => '*firefox',
+            'host'    => 'localhost',
+            'port'    => 4444
+        ),
+        array(
+            'browser' => '*firefox',
         )
     );
 
     public function setUp()
     {
-        $this->setBrowserUrl('http://localhost:8080/');
+        $this->setBrowserUrl(PHPUNIT_TESTSUITE_EXTENSION_SELENIUM_TESTS_URL);
+        $this->assertEquals('*firefox', $this->getBrowser());
     }
 
     public function testSessionIsLaunchedCorrectly()
@@ -90,5 +96,10 @@ class Extensions_SeleniumTestCaseMultipleBrowsersTest extends PHPUnit_Extensions
         return array(
             array('html/test_open.html')
         );
+    }
+
+    public function testTheBrowserNameIsAccessible()
+    {
+        $this->assertEquals('*firefox', $this->getBrowser());
     }
 }

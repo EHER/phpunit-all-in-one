@@ -38,7 +38,7 @@
  * @subpackage Framework
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 2.2.0
  */
@@ -50,8 +50,8 @@
  * @subpackage Framework
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.6.11
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.2.0
  */
@@ -60,18 +60,17 @@ class PHPUnit_Framework_Error extends Exception
     /**
      * Constructor.
      *
-     * @param  string  $message
-     * @param  integer $code
-     * @param  string  $file
-     * @param  integer $line
-     * @param  array   $trace
+     * @param  string     $message
+     * @param  integer    $code
+     * @param  string     $file
+     * @param  integer    $line
+     * @param  Exception  $previous
      */
-    public function __construct($message, $code, $file, $line, $trace)
+    public function __construct($message, $code, $file, $line, Exception $previous = NULL)
     {
-        parent::__construct($message, $code);
+        parent::__construct($message, $code, $previous);
 
         $this->file  = $file;
         $this->line  = $line;
-        $this->trace = $trace;
     }
 }

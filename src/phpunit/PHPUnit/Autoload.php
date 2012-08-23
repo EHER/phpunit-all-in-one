@@ -37,7 +37,7 @@
  * @package    PHPUnit
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.5.0
  */
@@ -56,7 +56,6 @@ function phpunit_autoload($class = NULL)
     if ($classes === NULL) {
         $classes = array(
           'phpunit_extensions_grouptestsuite' => '/Extensions/GroupTestSuite.php',
-          'phpunit_extensions_outputtestcase' => '/Extensions/OutputTestCase.php',
           'phpunit_extensions_phpttestcase' => '/Extensions/PhptTestCase.php',
           'phpunit_extensions_phpttestcase_logger' => '/Extensions/PhptTestCase/Logger.php',
           'phpunit_extensions_phpttestsuite' => '/Extensions/PhptTestSuite.php',
@@ -83,6 +82,7 @@ function phpunit_autoload($class = NULL)
           'phpunit_framework_constraint_and' => '/Framework/Constraint/And.php',
           'phpunit_framework_constraint_arrayhaskey' => '/Framework/Constraint/ArrayHasKey.php',
           'phpunit_framework_constraint_attribute' => '/Framework/Constraint/Attribute.php',
+          'phpunit_framework_constraint_callback' => '/Framework/Constraint/Callback.php',
           'phpunit_framework_constraint_classhasattribute' => '/Framework/Constraint/ClassHasAttribute.php',
           'phpunit_framework_constraint_classhasstaticattribute' => '/Framework/Constraint/ClassHasStaticAttribute.php',
           'phpunit_framework_constraint_composite' => '/Framework/Constraint/Composite.php',
@@ -101,6 +101,8 @@ function phpunit_autoload($class = NULL)
           'phpunit_framework_constraint_isnull' => '/Framework/Constraint/IsNull.php',
           'phpunit_framework_constraint_istrue' => '/Framework/Constraint/IsTrue.php',
           'phpunit_framework_constraint_istype' => '/Framework/Constraint/IsType.php',
+          'phpunit_framework_constraint_jsonmatches' => '/Framework/Constraint/JsonMatches.php',
+          'phpunit_framework_constraint_jsonmatches_errormessageprovider' => '/Framework/Constraint/JsonMatches/ErrorMessageProvider.php',
           'phpunit_framework_constraint_lessthan' => '/Framework/Constraint/LessThan.php',
           'phpunit_framework_constraint_not' => '/Framework/Constraint/Not.php',
           'phpunit_framework_constraint_objecthasattribute' => '/Framework/Constraint/ObjectHasAttribute.php',
@@ -149,7 +151,6 @@ function phpunit_autoload($class = NULL)
           'phpunit_util_deprecatedfeature_logger' => '/Util/DeprecatedFeature/Logger.php',
           'phpunit_util_diff' => '/Util/Diff.php',
           'phpunit_util_errorhandler' => '/Util/ErrorHandler.php',
-          'phpunit_util_file' => '/Util/File.php',
           'phpunit_util_fileloader' => '/Util/Fileloader.php',
           'phpunit_util_filesystem' => '/Util/Filesystem.php',
           'phpunit_util_filter' => '/Util/Filter.php',
@@ -163,9 +164,6 @@ function phpunit_autoload($class = NULL)
           'phpunit_util_php_default' => '/Util/PHP/Default.php',
           'phpunit_util_php_windows' => '/Util/PHP/Windows.php',
           'phpunit_util_printer' => '/Util/Printer.php',
-          'phpunit_util_skeleton' => '/Util/Skeleton.php',
-          'phpunit_util_skeleton_class' => '/Util/Skeleton/Class.php',
-          'phpunit_util_skeleton_test' => '/Util/Skeleton/Test.php',
           'phpunit_util_string' => '/Util/String.php',
           'phpunit_util_test' => '/Util/Test.php',
           'phpunit_util_testdox_nameprettifier' => '/Util/TestDox/NamePrettifier.php',
@@ -206,18 +204,22 @@ function phpunit_autoload($class = NULL)
 
 spl_autoload_register('phpunit_autoload');
 
-if (PHPUnit_Util_Filesystem::fileExistsInIncludePath('PHP/Invoker/Autoload.php')) {
+if (stream_resolve_include_path('PHP/Invoker/Autoload.php')) {
     require_once 'PHP/Invoker/Autoload.php';
 }
 
-if (PHPUnit_Util_Filesystem::fileExistsInIncludePath('PHPUnit/Extensions/Database/Autoload.php')) {
+if (stream_resolve_include_path('PHPUnit/Extensions/Database/Autoload.php')) {
     require_once 'PHPUnit/Extensions/Database/Autoload.php';
 }
 
-if (PHPUnit_Util_Filesystem::fileExistsInIncludePath('PHPUnit/Extensions/SeleniumTestCase/Autoload.php')) {
+if (stream_resolve_include_path('PHPUnit/Extensions/SeleniumCommon/Autoload.php')) {
+    require_once 'PHPUnit/Extensions/SeleniumCommon/Autoload.php';
+}
+
+else if (stream_resolve_include_path('PHPUnit/Extensions/SeleniumTestCase/Autoload.php')) {
     require_once 'PHPUnit/Extensions/SeleniumTestCase/Autoload.php';
 }
 
-if (PHPUnit_Util_Filesystem::fileExistsInIncludePath('PHPUnit/Extensions/Story/Autoload.php')) {
+if (stream_resolve_include_path('PHPUnit/Extensions/Story/Autoload.php')) {
     require_once 'PHPUnit/Extensions/Story/Autoload.php';
 }

@@ -38,7 +38,7 @@
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.0.0
  */
@@ -50,8 +50,8 @@
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.6.11
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
@@ -59,7 +59,8 @@ class PHPUnit_Util_Test
 {
     const REGEX_DATA_PROVIDER      = '/@dataProvider\s+([a-zA-Z0-9._:-\\\\x7f-\xff]+)/';
     const REGEX_EXPECTED_EXCEPTION = '(@expectedException\s+([:.\w\\\\x7f-\xff]+)(?:[\t ]+(\S*))?(?:[\t ]+(\S*))?\s*$)m';
-    const REGEX_REQUIRES           = '/@requires\s+(?P<name>PHP(?:Unit)?)\s+(?P<value>[\d\.-]+(dev|(RC|alpha|beta)[\d\.])?)[ \t]*\r?$/m';
+    const REGEX_REQUIRES_VERSION   = '/@requires\s+(?P<name>PHP(?:Unit)?)\s+(?P<value>[\d\.-]+(dev|(RC|alpha|beta)[\d\.])?)[ \t]*\r?$/m';
+    const REGEX_REQUIRES           = '/@requires\s+(?P<name>function|extension)\s(?P<value>([^ ]+))\r?$/m';
 
     const SMALL  = 0;
     const MEDIUM = 1;
@@ -111,13 +112,24 @@ class PHPUnit_Util_Test
      */
     public static function getRequirements($className, $methodName)
     {
-        $reflector  = new ReflectionMethod($className, $methodName);
+        $reflector  = new ReflectionClass($className);
         $docComment = $reflector->getDocComment();
+        $reflector  = new ReflectionMethod($className, $methodName);
+        $docComment .= "\n" . $reflector->getDocComment();
         $requires   = array();
 
-        if ($count = preg_match_all(self::REGEX_REQUIRES, $docComment, $matches)) {
+        if ($count = preg_match_all(self::REGEX_REQUIRES_VERSION, $docComment, $matches)) {
             for ($i = 0; $i < $count; $i++) {
                 $requires[$matches['name'][$i]] = $matches['value'][$i];
+            }
+        }
+        if ($count = preg_match_all(self::REGEX_REQUIRES, $docComment, $matches)) {
+            for ($i = 0; $i < $count; $i++) {
+                $name = $matches['name'][$i] . 's';
+                if (!isset($requires[$name])) {
+                    $requires[$name] = array();
+                }
+                $requires[$name][] = $matches['value'][$i];
             }
         }
 
@@ -151,7 +163,9 @@ class PHPUnit_Util_Test
             }
 
             else if (isset($annotations['method']['expectedExceptionMessage'])) {
-                $message = $annotations['method']['expectedExceptionMessage'][0];
+                $message = self::_parseAnnotationContent(
+                    $annotations['method']['expectedExceptionMessage'][0]
+                );
             }
 
             if (isset($matches[3])) {
@@ -159,7 +173,9 @@ class PHPUnit_Util_Test
             }
 
             else if (isset($annotations['method']['expectedExceptionCode'])) {
-                $code = $annotations['method']['expectedExceptionCode'][0];
+                $code = self::_parseAnnotationContent(
+                    $annotations['method']['expectedExceptionCode'][0]
+                );
             }
 
             if (is_numeric($code)) {
@@ -176,6 +192,26 @@ class PHPUnit_Util_Test
         }
 
         return FALSE;
+    }
+
+    /**
+     * Parse annotation content to use constant/class constant values
+     *
+     * Constants are specified using a starting '@'. For example: @ClassName::CONST_NAME
+     *
+     * If the constant is not found the string is used as is to ensure maximum BC.
+     *
+     * @param  string $message
+     * @return string
+     */
+    protected static function _parseAnnotationContent($message)
+    {
+        if (strpos($message, '::') !== FALSE && count(explode('::', $message) == 2)) {
+            if (defined($message)) {
+                $message = constant($message);
+            }
+        }
+        return $message;
     }
 
     /**
@@ -233,7 +269,7 @@ class PHPUnit_Util_Test
         if ($data !== NULL) {
             foreach ($data as $key => $value) {
                 if (!is_array($value)) {
-                    throw new InvalidArgumentException(
+                    throw new PHPUnit_Framework_Exception(
                       sprintf(
                         'Data set %s is invalid.',
                         is_int($key) ? '#' . $key : '"' . $key . '"'

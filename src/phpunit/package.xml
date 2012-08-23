@@ -17,16 +17,16 @@
   <email>sebastian@phpunit.de</email>
   <active>yes</active>
  </lead>
- <date>2012-05-31</date>
+ <date>2012-08-18</date>
  <version>
- <release>3.6.11</release>
-  <api>3.6.0</api>
+  <release>3.7.0RC1</release>
+  <api>3.7.0</api>
  </version>
  <stability>
-  <release>stable</release>
-  <api>stable</api>
+  <release>beta</release>
+  <api>beta</api>
  </stability>
- <license>BSD License</license>
+ <license>The BSD 3-Clause License</license>
  <notes>http://github.com/sebastianbergmann/phpunit/blob/master/README.markdown</notes>
  <contents>
   <dir name="/">
@@ -38,9 +38,6 @@
       </file>
      </dir>
      <file baseinstalldir="/" name="GroupTestSuite.php" role="php">
-      <tasks:replace from="@package_version@" to="version" type="package-info" />
-     </file>
-     <file baseinstalldir="/" name="OutputTestCase.php" role="php">
       <tasks:replace from="@package_version@" to="version" type="package-info" />
      </file>
      <file baseinstalldir="/" name="PhptTestCase.php" role="php">
@@ -348,46 +345,6 @@
        <tasks:replace from="@package_version@" to="version" type="package-info" />
       </file>
      </dir>
-     <dir name="Skeleton">
-      <dir name="Template">
-       <file baseinstalldir="/" name="Class.tpl.dist" role="php">
-        <tasks:replace from="@package_version@" to="version" type="package-info" />
-       </file>
-       <file baseinstalldir="/" name="IncompleteTestMethod.tpl.dist" role="php">
-        <tasks:replace from="@package_version@" to="version" type="package-info" />
-       </file>
-       <file baseinstalldir="/" name="Method.tpl.dist" role="php">
-        <tasks:replace from="@package_version@" to="version" type="package-info" />
-       </file>
-       <file baseinstalldir="/" name="TestClass.tpl.dist" role="php">
-        <tasks:replace from="@package_version@" to="version" type="package-info" />
-       </file>
-       <file baseinstalldir="/" name="TestMethod.tpl.dist" role="php">
-        <tasks:replace from="@package_version@" to="version" type="package-info" />
-       </file>
-       <file baseinstalldir="/" name="TestMethodStatic.tpl.dist" role="php">
-        <tasks:replace from="@package_version@" to="version" type="package-info" />
-       </file>
-       <file baseinstalldir="/" name="TestMethodBool.tpl.dist" role="php">
-        <tasks:replace from="@package_version@" to="version" type="package-info" />
-       </file>
-       <file baseinstalldir="/" name="TestMethodBoolStatic.tpl.dist" role="php">
-        <tasks:replace from="@package_version@" to="version" type="package-info" />
-       </file>
-       <file baseinstalldir="/" name="TestMethodException.tpl.dist" role="php">
-        <tasks:replace from="@package_version@" to="version" type="package-info" />
-       </file>
-       <file baseinstalldir="/" name="TestMethodExceptionStatic.tpl.dist" role="php">
-        <tasks:replace from="@package_version@" to="version" type="package-info" />
-       </file>
-      </dir>
-      <file baseinstalldir="/" name="Class.php" role="php">
-       <tasks:replace from="@package_version@" to="version" type="package-info" />
-      </file>
-      <file baseinstalldir="/" name="Test.php" role="php">
-       <tasks:replace from="@package_version@" to="version" type="package-info" />
-      </file>
-     </dir>
      <dir name="TestDox">
       <dir name="ResultPrinter">
        <file baseinstalldir="/" name="HTML.php" role="php">
@@ -423,9 +380,6 @@
       <tasks:replace from="@package_version@" to="version" type="package-info" />
       <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
      </file>
-     <file baseinstalldir="/" name="File.php" role="php">
-      <tasks:replace from="@package_version@" to="version" type="package-info" />
-     </file>
      <file baseinstalldir="/" name="Filesystem.php" role="php">
       <tasks:replace from="@package_version@" to="version" type="package-info" />
      </file>
@@ -446,9 +400,6 @@
       <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
      </file>
      <file baseinstalldir="/" name="Printer.php" role="php">
-      <tasks:replace from="@package_version@" to="version" type="package-info" />
-     </file>
-     <file baseinstalldir="/" name="Skeleton.php" role="php">
       <tasks:replace from="@package_version@" to="version" type="package-info" />
      </file>
      <file baseinstalldir="/" name="String.php" role="php">
@@ -490,7 +441,7 @@
  <dependencies>
   <required>
    <php>
-    <min>5.2.7</min>
+    <min>5.3.3</min>
    </php>
    <pearinstaller>
     <min>1.9.4</min>
@@ -498,7 +449,7 @@
    <package>
     <name>File_Iterator</name>
     <channel>pear.phpunit.de</channel>
-    <min>1.3.0</min>
+    <min>1.3.1</min>
    </package>
    <package>
     <name>Text_Template</name>
@@ -508,22 +459,22 @@
    <package>
     <name>PHP_CodeCoverage</name>
     <channel>pear.phpunit.de</channel>
-    <min>1.1.0</min>
+    <min>1.2.0RC1</min>
    </package>
    <package>
     <name>PHP_Timer</name>
     <channel>pear.phpunit.de</channel>
-    <min>1.0.1</min>
+    <min>1.0.2</min>
    </package>
    <package>
     <name>PHPUnit_MockObject</name>
     <channel>pear.phpunit.de</channel>
-    <min>1.1.0</min>
+    <min>1.2.0RC1</min>
    </package>
    <package>
-    <name>YAML</name>
-    <channel>pear.symfony-project.com</channel>
-    <min>1.0.2</min>
+    <name>Yaml</name>
+    <channel>pear.symfony.com</channel>
+    <min>2.1.0RC1</min>
    </package>
    <extension>
     <name>dom</name>

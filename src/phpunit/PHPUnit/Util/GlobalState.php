@@ -38,7 +38,7 @@
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.4.0
  */
@@ -50,8 +50,8 @@
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- * @version    Release: 3.6.11
+ * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
+ * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.4.0
  */
@@ -286,7 +286,7 @@ class PHPUnit_Util_GlobalState
                 strpos($declaredClasses[$i], 'PHP_Invoker') !== 0 &&
                 strpos($declaredClasses[$i], 'PHP_Timer') !== 0 &&
                 strpos($declaredClasses[$i], 'PHP_TokenStream') !== 0 &&
-                strpos($declaredClasses[$i], 'sfYaml') !== 0 &&
+                strpos($declaredClasses[$i], 'Symfony') !== 0 &&
                 strpos($declaredClasses[$i], 'Text_Template') !== 0 &&
                 !$declaredClasses[$i] instanceof PHPUnit_Framework_Test) {
                 $class = new ReflectionClass($declaredClasses[$i]);
@@ -373,15 +373,43 @@ class PHPUnit_Util_GlobalState
     public static function phpunitFiles()
     {
         if (self::$phpunitFiles === NULL) {
-            self::$phpunitFiles = array_merge(
-              phpunit_autoload(),
-              phpunit_mockobject_autoload(),
-              file_iterator_autoload(),
-              php_codecoverage_autoload(),
-              php_timer_autoload(),
-              php_tokenstream_autoload(),
-              text_template_autoload()
-            );
+            self::$phpunitFiles = phpunit_autoload();
+
+            if (function_exists('phpunit_mockobject_autoload')) {
+                self::$phpunitFiles = array_merge(
+                  self::$phpunitFiles, phpunit_mockobject_autoload()
+                );
+            }
+
+            if (function_exists('file_iterator_autoload')) {
+                self::$phpunitFiles = array_merge(
+                  self::$phpunitFiles, file_iterator_autoload()
+                );
+            }
+
+            if (function_exists('php_codecoverage_autoload')) {
+                self::$phpunitFiles = array_merge(
+                  self::$phpunitFiles, php_codecoverage_autoload()
+                );
+            }
+
+            if (function_exists('php_timer_autoload')) {
+                self::$phpunitFiles = array_merge(
+                  self::$phpunitFiles, php_timer_autoload()
+                );
+            }
+
+            if (function_exists('php_tokenstream_autoload')) {
+                self::$phpunitFiles = array_merge(
+                  self::$phpunitFiles, php_tokenstream_autoload()
+                );
+            }
+
+            if (function_exists('text_template_autoload')) {
+                self::$phpunitFiles = array_merge(
+                  self::$phpunitFiles, text_template_autoload()
+                );
+            }
 
             if (function_exists('phpunit_dbunit_autoload')) {
                 self::$phpunitFiles = array_merge(

@@ -43,7 +43,7 @@
         <file>/path/to/file</file>
       </exclude>
     </blacklist>
-    <whitelist addUncoveredFilesFromWhitelist="true">
+    <whitelist processUncoveredFilesFromWhitelist="false">
       <directory suffix=".php">/path/to/files</directory>
       <file>/path/to/file</file>
       <exclude>
@@ -71,6 +71,7 @@
       </arguments>
     </listener>
     <listener class="IncludePathListener" file="ConfigurationTest.php" />
+    <listener class="CompactArgumentsListener" file="/CompactArgumentsListener.php"><arguments><integer>42</integer></arguments></listener>
   </listeners>
 
   <logging>

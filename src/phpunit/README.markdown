@@ -6,8 +6,8 @@ PHPUnit is the de-facto standard for unit testing in PHP projects. It provides b
 Requirements
 ------------
 
-* PHPUnit 3.6 requires PHP 5.2.7 (or later) but PHP 5.4.0 (or later) is highly recommended.
-* [PHP_CodeCoverage](http://github.com/sebastianbergmann/php-code-coverage), the library that is used by PHPUnit to collect and process code coverage information, depends on [Xdebug](http://xdebug.org/) 2.0.5 (or later) but Xdebug 2.1.3 (or later) is highly recommended.
+* PHPUnit 3.7 requires PHP 5.3.3 (or later) but PHP 5.4.0 (or later) is highly recommended.
+* [PHP_CodeCoverage](http://github.com/sebastianbergmann/php-code-coverage), the library that is used by PHPUnit to collect and process code coverage information, depends on [Xdebug](http://xdebug.org/) 2.0.5 (or later) but Xdebug 2.2.0 (or later) is highly recommended.
 
 Installation
 ------------
@@ -28,18 +28,18 @@ Documentation
 
 The documentation for PHPUnit is available in different formats:
 
-* [English, multiple HTML files](http://www.phpunit.de/manual/3.6/en/index.html)
-* [English, single HTML file](http://www.phpunit.de/manual/3.6/en/phpunit-book.html)
-* [English, PDF](http://www.phpunit.de/manual/3.6/en/phpunit-book.pdf)
-* [English, ePub](http://www.phpunit.de/manual/3.6/en/phpunit-book.epub)
-* [French, multiple HTML files](http://www.phpunit.de/manual/3.6/fr/index.html)
-* [French, single HTML file](http://www.phpunit.de/manual/3.6/fr/phpunit-book.html)
-* [French, PDF](http://www.phpunit.de/manual/3.6/fr/phpunit-book.pdf)
-* [French, ePub](http://www.phpunit.de/manual/3.6/fr/phpunit-book.epub)
-* [Japanese, multiple HTML files](http://www.phpunit.de/manual/3.6/ja/index.html)
-* [Japanese, single HTML file](http://www.phpunit.de/manual/3.6/ja/phpunit-book.html)
-* [Japanese, PDF](http://www.phpunit.de/manual/3.6/ja/phpunit-book.pdf)
-* [Japanese, ePub](http://www.phpunit.de/manual/3.6/ja/phpunit-book.epub)
+* [English, multiple HTML files](http://www.phpunit.de/manual/3.7/en/index.html)
+* [English, single HTML file](http://www.phpunit.de/manual/3.7/en/phpunit-book.html)
+* [English, PDF](http://www.phpunit.de/manual/3.7/en/phpunit-book.pdf)
+* [English, ePub](http://www.phpunit.de/manual/3.7/en/phpunit-book.epub)
+* [French, multiple HTML files](http://www.phpunit.de/manual/3.7/fr/index.html)
+* [French, single HTML file](http://www.phpunit.de/manual/3.7/fr/phpunit-book.html)
+* [French, PDF](http://www.phpunit.de/manual/3.7/fr/phpunit-book.pdf)
+* [French, ePub](http://www.phpunit.de/manual/3.7/fr/phpunit-book.epub)
+* [Japanese, multiple HTML files](http://www.phpunit.de/manual/3.7/ja/index.html)
+* [Japanese, single HTML file](http://www.phpunit.de/manual/3.7/ja/phpunit-book.html)
+* [Japanese, PDF](http://www.phpunit.de/manual/3.7/ja/phpunit-book.pdf)
+* [Japanese, ePub](http://www.phpunit.de/manual/3.7/ja/phpunit-book.epub)
 
 IRC
 ---
@@ -68,14 +68,54 @@ The `dbunit`, `php-code-coverage`, `php-file-iterator`, `php-text-template`, `ph
 
 In addition to the checkouts listed above, the YAML component that is provided by the Symfony project is required:
 
-    pear install pear.symfony-project.com/YAML
+    pear install pear.symfony.com/Yaml
 
 The `phpunit/phpunit.php` script can be used to invoke the PHPUnit test runner.
 
-The following commands can be used to check out the appropriate branches for PHPUnit 3.6:
+Contributing
+------------
 
-    cd phpunit && git checkout 3.6 && cd ..
-    cd dbunit && git checkout 1.1 && cd ..
-    cd php-code-coverage && git checkout 1.1 && cd ..
-    cd phpunit-mock-objects && git checkout 1.1 && cd ..
-    cd phpunit-selenium && git checkout 1.1 && cd ..
+Contributions to PHPUnit, its related modules and its documentation are always welcome and best done using GitHub pull request.
+
+Please note that the `3.6.` branch is closed for features and that pull requests should to be based on `master` or the `3.7.` once it exists. 
+
+We are trying to keep BC breaks in PHPUnit 3.7 to a absolute minimum so please take this into account when proposing changes.
+
+Due to time constraints we are not always able to respond as quickly as we'd like to so please do not take delays personal and feel free to remind us here or on IRC if you feel that we forgot to respond.
+
+### List of Contributors
+
+Thanks to everyone that has contributed to PHPUnit! You can find a detailed contributors list on every PHPUnit related package on GitHub. This list shows only the bigger components:
+
+- [PHPUnit core](https://github.com/sebastianbergmann/phpunit/graphs/contributors)
+- [PHP code coverage](https://github.com/sebastianbergmann/php-code-coverage/graphs/contributors)
+- [PHPUnit mock objects](https://github.com/sebastianbergmann/phpunit-mock-objects/graphs/contributors)
+
+A very special thanks to everyone that has contributed to the documentation and helped maintaining the translations:
+
+- [PHPUnit Documentation](https://github.com/sebastianbergmann/phpunit-documentation/graphs/contributors)
+
+### Running the test suite(s)
+
+It's not possible to use a system wide installed version of PHPUnit to run the test suite of a git checkout. Because of that is is necessary to change the include paths like describe above.
+
+This can be achieved with a small wrapper script designed to work with every module in the PHPUnit stack.
+
+Note that you might have to change the path to your pear installation here pointing to `/usr/local/lib/php`. You can find it using `pear config-show | grep php_dir`
+
+**Linux/Mac**
+
+`run-tests.sh`
+
+> \#!/bin/bash
+>
+> php -d include_path='.:../phpunit/:../dbunit/:../php-code-coverage/:../php-file-iterator/:../php-invoker/:../php-text-template/:../php-timer:../php-token-stream:../phpunit-mock-objects/:../phpunit-selenium/:../phpunit-story/:/usr/local/lib/php' ../phpunit/phpunit.php $*
+
+**Windows**
+
+`run-tests.bat`
+
+> @echo off
+>
+> php -d include_path='.;../phpunit/;../dbunit/;../php-code-coverage/;../php-file-iterator/;../php-invoker/;../php-text-template/;../php-timer;../php-token-stream;../phpunit-mock-objects/;../phpunit-selenium/;../phpunit-story/;C:/Program Files/PHP/pear' ../phpunit/phpunit.php %*
+
