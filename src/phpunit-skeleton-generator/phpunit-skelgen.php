@@ -36,9 +36,10 @@
  */
 
 if (strpos('@php_bin@', '@php_bin') === 0) {
-    require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'PHPUnit' . DIRECTORY_SEPARATOR . 'SkeletonGenerator' . DIRECTORY_SEPARATOR . 'Autoload.php';
+    require __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'autoload.php';
 } else {
-    require '@php_dir@' . DIRECTORY_SEPARATOR . 'PHPUnit' . DIRECTORY_SEPARATOR . 'SkeletonGenerator' . DIRECTORY_SEPARATOR . 'Autoload.php';
+    require 'SebastianBergmann/PHPUnit/SkeletonGenerator/autoload.php';
 }
 
-PHPUnit_SkeletonGenerator_TextUI_Command::main();
+$textui = new SebastianBergmann\PHPUnit\SkeletonGenerator\Command;
+$textui->main();

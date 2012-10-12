@@ -76,7 +76,6 @@
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
@@ -649,6 +648,9 @@ class PHPUnit_Framework_TestSuite implements PHPUnit_Framework_Test, PHPUnit_Fra
                 $this->setUp();
 
                 if ($this->testCase &&
+                    // Some extensions use test names that are not classes;
+                    // The method_exists() triggers an autoload call that causes issues with die()ing autoloaders.
+                    class_exists($this->name, false) &&
                     method_exists($this->name, 'setUpBeforeClass')) {
                     call_user_func(array($this->name, 'setUpBeforeClass'));
                 }
@@ -747,6 +749,9 @@ class PHPUnit_Framework_TestSuite implements PHPUnit_Framework_Test, PHPUnit_Fra
 
         if ($doSetup) {
             if ($this->testCase &&
+                // Some extensions use test names that are not classes;
+                // The method_exists() triggers an autoload call that causes issues with die()ing autoloaders.
+                class_exists($this->name, false) &&
                 method_exists($this->name, 'tearDownAfterClass')) {
                 call_user_func(array($this->name, 'tearDownAfterClass'));
             }

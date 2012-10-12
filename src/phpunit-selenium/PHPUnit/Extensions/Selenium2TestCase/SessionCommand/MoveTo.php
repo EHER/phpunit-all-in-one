@@ -49,7 +49,7 @@
  * @package    PHPUnit_Selenium
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.8
+ * @version    Release: 1.2.9
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.8
  */

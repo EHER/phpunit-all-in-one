@@ -66,7 +66,6 @@ require_once TEST_FILES_PATH . 'BankAccountTest.php';
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.0.0
  */
@@ -82,7 +81,7 @@ class PHP_CodeCoverageTest extends PHP_CodeCoverage_TestCase
         $this->getLinesToBeCovered = new ReflectionMethod(
           'PHP_CodeCoverage', 'getLinesToBeCovered'
         );
- 
+
         $this->getLinesToBeCovered->setAccessible(TRUE);
     }
 
@@ -235,10 +234,13 @@ class PHP_CodeCoverageTest extends PHP_CodeCoverage_TestCase
     }
 
     /**
-     * @covers PHP_CodeCoverage::start
-     * @covers PHP_CodeCoverage::stop
-     * @covers PHP_CodeCoverage::append
-     * @covers PHP_CodeCoverage::applyListsFilter
+     * Add parenthesis to the covers annotation below in a couple of different ways to make sure it
+     * works as expected
+     *
+     * @covers PHP_CodeCoverage::start()
+     * @covers PHP_CodeCoverage::stop( )
+     * @covers PHP_CodeCoverage::append ()
+     * @covers PHP_CodeCoverage::applyListsFilter ( )
      * @covers PHP_CodeCoverage::initializeFilesThatAreSeenTheFirstTime
      * @covers PHP_CodeCoverage::applyCoversAnnotationFilter
      * @covers PHP_CodeCoverage::getTests
@@ -410,6 +412,10 @@ class PHP_CodeCoverageTest extends PHP_CodeCoverage_TestCase
           ),
           array(
             'CoverageMethodTest',
+            range(31, 35)
+          ),
+          array(
+            'CoverageMethodOneLineAnnotationTest',
             range(31, 35)
           ),
           array(

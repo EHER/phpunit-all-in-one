@@ -56,6 +56,7 @@ require_once TEST_FILES_PATH . 'CoverageClassExtendedTest.php';
 require_once TEST_FILES_PATH . 'CoverageClassTest.php';
 require_once TEST_FILES_PATH . 'CoverageFunctionTest.php';
 require_once TEST_FILES_PATH . 'CoverageMethodTest.php';
+require_once TEST_FILES_PATH . 'CoverageMethodOneLineAnnotationTest.php';
 require_once TEST_FILES_PATH . 'CoverageNoneTest.php';
 require_once TEST_FILES_PATH . 'CoverageNotPrivateTest.php';
 require_once TEST_FILES_PATH . 'CoverageNotProtectedTest.php';
@@ -89,7 +90,6 @@ require_once TEST_FILES_PATH . 'CoverageNothingTest.php';
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.0.0
  */
@@ -107,6 +107,9 @@ class PHP_CodeCoverage_UtilTest extends PHPUnit_Framework_TestCase
              4 => TRUE,
              5 => TRUE,
              7 => TRUE,
+             8 => TRUE,
+             9 => TRUE,
+            10 => TRUE,
             11 => TRUE,
             12 => TRUE,
             13 => TRUE,
@@ -151,6 +154,31 @@ class PHP_CodeCoverage_UtilTest extends PHPUnit_Framework_TestCase
           )
         );
     }
+
+    /**
+     * @covers PHP_CodeCoverage_Util::getLinesToBeIgnored
+     */
+    public function testGetLinesToBeIgnoredOneLineAnnotations()
+    {
+        $this->assertEquals(
+          array(
+            1 => TRUE,
+            2 => TRUE,
+            7 => TRUE,
+            3 => TRUE,
+            4 => TRUE,
+            5 => TRUE,
+            6 => TRUE,
+            8 => TRUE,
+            9 => TRUE,
+            13 => TRUE,
+          ),
+          PHP_CodeCoverage_Util::getLinesToBeIgnored(
+            TEST_FILES_PATH . 'source_with_oneline_annotations.php'
+          )
+        );
+    }
+
 
     /**
      * @covers PHP_CodeCoverage_Util::percent

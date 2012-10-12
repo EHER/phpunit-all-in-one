@@ -61,7 +61,6 @@ if (!defined('TEST_FILES_PATH')) {
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.0.0
  */
@@ -80,6 +79,7 @@ class PHP_CodeCoverage_FilterTest extends PHPUnit_Framework_TestCase
           TEST_FILES_PATH . 'CoverageClassExtendedTest.php',
           TEST_FILES_PATH . 'CoverageClassTest.php',
           TEST_FILES_PATH . 'CoverageFunctionTest.php',
+          TEST_FILES_PATH . 'CoverageMethodOneLineAnnotationTest.php',
           TEST_FILES_PATH . 'CoverageMethodTest.php',
           TEST_FILES_PATH . 'CoverageNoneTest.php',
           TEST_FILES_PATH . 'CoverageNotPrivateTest.php',
@@ -107,6 +107,7 @@ class PHP_CodeCoverage_FilterTest extends PHPUnit_Framework_TestCase
           TEST_FILES_PATH . 'NotExistingCoveredElementTest.php',
           TEST_FILES_PATH . 'source_with_ignore.php',
           TEST_FILES_PATH . 'source_with_namespace.php',
+          TEST_FILES_PATH . 'source_with_oneline_annotations.php',
           TEST_FILES_PATH . 'source_without_ignore.php',
           TEST_FILES_PATH . 'source_without_namespace.php'
         );
@@ -158,9 +159,12 @@ class PHP_CodeCoverage_FilterTest extends PHPUnit_Framework_TestCase
      */
     public function testAddingFilesToTheBlacklistWorks()
     {
-        $this->filter->addFilesToBlacklist(
-          $this->findFiles(TEST_FILES_PATH, '', '.php')
+        $facade = new File_Iterator_Facade;
+        $files  = $facade->getFilesAsArray(
+          TEST_FILES_PATH, $suffixes = '.php'
         );
+
+        $this->filter->addFilesToBlacklist($files);
 
         $blacklist = $this->filter->getBlacklist();
         sort($blacklist);
@@ -227,9 +231,12 @@ class PHP_CodeCoverage_FilterTest extends PHPUnit_Framework_TestCase
      */
     public function testAddingFilesToTheWhitelistWorks()
     {
-        $this->filter->addFilesToWhitelist(
-          $this->findFiles(TEST_FILES_PATH, '', '.php')
+        $facade = new File_Iterator_Facade;
+        $files  = $facade->getFilesAsArray(
+          TEST_FILES_PATH, $suffixes = '.php'
         );
+
+        $this->filter->addFilesToWhitelist($files);
 
         $whitelist = $this->filter->getWhitelist();
         sort($whitelist);
@@ -287,36 +294,5 @@ class PHP_CodeCoverage_FilterTest extends PHPUnit_Framework_TestCase
     {
         $this->filter->addFileToWhitelist($this->files[0]);
         $this->assertTrue($this->filter->isFiltered($this->files[1]));
-    }
-
-    /**
-     * @covers            PHP_CodeCoverage_Filter::isFiltered
-     * @expectedException PHP_CodeCoverage_Exception
-     */
-    public function testIsFilteredThrowsExceptionForInvalidArgument()
-    {
-        $this->filter->isFiltered('foo', array(), NULL);
-    }
-
-    protected function findFiles($directory, $prefix, $suffix)
-    {
-        $finder = new Symfony\Component\Finder\Finder;
-        $finder->in($directory);
-
-        if (!empty($prefix)) {
-            $finder->name($prefix . '*');
-        }
-
-        if (!empty($suffix)) {
-            $finder->name('*' . $suffix);
-        }
-
-        $files = array();
-
-        foreach ($finder as $file) {
-            $files[] = $file->getRealpath();
-        }
-
-        return $files;
     }
 }

@@ -43,20 +43,6 @@
  * @since      File available since Release 1.1.0
  */
 
-// @codeCoverageIgnoreStart
-if (!defined('T_TRAIT')) {
-    define('T_TRAIT', 1001);
-}
-
-if (!defined('T_INSTEADOF')) {
-    define('T_INSTEADOF', 1002);
-}
-
-if (!defined('T_CALLABLE')) {
-    define('T_CALLABLE', 1003);
-}
-// @codeCoverageIgnoreEnd
-
 /**
  * Renders a PHP_CodeCoverage_Report_Node_File node.
  *
@@ -65,7 +51,6 @@ if (!defined('T_CALLABLE')) {
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.1.0
  */
@@ -77,11 +62,6 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
     protected $highlight;
 
     /**
-     * @var boolean
-     */
-    protected $yui;
-
-    /**
      * Constructor.
      *
      * @param string  $templatePath
@@ -91,9 +71,8 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
      * @param integer $lowUpperBound
      * @param integer $highLowerBound
      * @param boolean $highlight
-     * @param boolean $yui
      */
-    public function __construct($templatePath, $charset, $generator, $date, $lowUpperBound, $highLowerBound, $highlight, $yui)
+    public function __construct($templatePath, $charset, $generator, $date, $lowUpperBound, $highLowerBound, $highlight)
     {
         parent::__construct(
           $templatePath,
@@ -105,39 +84,24 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
         );
 
         $this->highlight = $highlight;
-        $this->yui       = $yui;
     }
 
     /**
      * @param PHP_CodeCoverage_Report_Node_File $node
      * @param string                            $file
-     * @param string                            $title
      */
-    public function render(PHP_CodeCoverage_Report_Node_File $node, $file, $title = NULL)
+    public function render(PHP_CodeCoverage_Report_Node_File $node, $file)
     {
-        if ($title === NULL) {
-            $title = $node->getName();
-        }
-
-        if ($this->yui) {
-            $template = new Text_Template($this->templatePath . 'file.html');
-        } else {
-            $template = new Text_Template(
-              $this->templatePath . 'file_no_yui.html'
-            );
-        }
-
-        list($source, $yuiTemplate) = $this->renderSource($node);
+        $template = new Text_Template($this->templatePath . 'file.html');
 
         $template->setVar(
           array(
-            'items'      => $this->renderItems($node),
-            'source'     => $source,
-            'yuiPanelJS' => $yuiTemplate
+            'items' => $this->renderItems($node),
+            'lines' => $this->renderSource($node)
           )
         );
 
-        $this->setCommonTemplateVariables($template, $title, $node);
+        $this->setCommonTemplateVariables($template, $node);
 
         $template->renderTo($file);
     }
@@ -157,7 +121,6 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
         $items = $this->renderItemTemplate(
           $template,
           array(
-            'itemClass'                    => 'coverDirectory',
             'name'                         => 'Total',
             'numClasses'                   => $node->getNumClassesAndTraits(),
             'numTestedClasses'             => $node->getNumTestedClassesAndTraits(),
@@ -169,8 +132,8 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
             'numExecutableLines'           => $node->getNumExecutableLines(),
             'testedMethodsPercent'         => $node->getTestedMethodsPercent(FALSE),
             'testedMethodsPercentAsString' => $node->getTestedMethodsPercent(),
-            'testedClassesPercent'         => $node->getTestedClassesPercent(FALSE),
-            'testedClassesPercentAsString' => $node->getTestedClassesPercent(),
+            'testedClassesPercent'         => $node->getTestedClassesAndTraitsPercent(FALSE),
+            'testedClassesPercentAsString' => $node->getTestedClassesAndTraitsPercent(),
             'crap'                         => '<acronym title="Change Risk Anti-Patterns (CRAP) Index">CRAP</acronym>'
           )
         );
@@ -216,7 +179,6 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
             $buffer .= $this->renderItemTemplate(
               $template,
               array(
-                'itemClass'                    => 'coverDirectory',
                 'name'                         => $name,
                 'numClasses'                   => 1,
                 'numTestedClasses'             => $numTestedMethods == $numMethods ? 1 : 0,
@@ -342,134 +304,104 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
      */
     protected function renderSource(PHP_CodeCoverage_Report_Node_File $node)
     {
-        if ($this->yui) {
-            $yuiTemplate = new Text_Template(
-              $this->templatePath . 'yui_item.js'
-            );
-        }
-
-        $coverageData             = $node->getCoverageData();
-        $ignoredLines             = $node->getIgnoredLines();
-        $testData                 = $node->getTestData();
-        list($codeLines, $fillup) = $this->loadFile($node->getPath());
-        $lines                    = '';
-        $yuiPanelJS               = '';
-        $i                        = 1;
+        $coverageData = $node->getCoverageData();
+        $ignoredLines = $node->getIgnoredLines();
+        $testData     = $node->getTestData();
+        $codeLines    = $this->loadFile($node->getPath());
+        $lines        = '';
+        $i            = 1;
 
         foreach ($codeLines as $line) {
-            $css = '';
+            $numTests       = '';
+            $trClass        = '';
+            $popoverContent = '';
+            $popoverTitle   = '';
 
             if (!isset($ignoredLines[$i]) && isset($coverageData[$i])) {
-                $count    = '';
                 $numTests = count($coverageData[$i]);
 
                 if ($coverageData[$i] === NULL) {
-                    $color = 'lineDeadCode';
-                    $count = '        ';
+                    $trClass = ' class="warning"';
                 }
 
                 else if ($numTests == 0) {
-                    $color = 'lineNoCov';
-                    $count = sprintf('%8d', 0);
+                    $trClass = ' class="danger"';
                 }
 
                 else {
-                    $color = 'lineCov';
-                    $count = sprintf('%8d', $numTests);
+                    $trClass        = ' class="success popin"';
+                    $popoverContent = '<ul>';
 
-                    if ($this->yui) {
-                        $buffer  = '';
-                        $testCSS = '';
-
-                        foreach ($coverageData[$i] as $test) {
-                            switch ($testData[$test]) {
-                                case 0: {
-                                    $testCSS = ' class=\"testPassed\"';
-                                }
-                                break;
-
-                                case 1:
-                                case 2: {
-                                    $testCSS = ' class=\"testIncomplete\"';
-                                }
-                                break;
-
-                                case 3: {
-                                    $testCSS = ' class=\"testFailure\"';
-                                }
-                                break;
-
-                                case 4: {
-                                    $testCSS = ' class=\"testError\"';
-                                }
-                                break;
-
-                                default: {
-                                    $testCSS = '';
-                                }
-                            }
-
-                            $buffer .= sprintf(
-                              '<li%s>%s</li>',
-
-                              $testCSS,
-                              addslashes(htmlspecialchars($test))
-                            );
-                        }
-
-                        if ($numTests > 1) {
-                            $header = $numTests . ' tests cover';
-                        } else {
-                            $header = '1 test covers';
-                        }
-
-                        $header .= ' line ' . $i;
-
-                        $yuiTemplate->setVar(
-                          array(
-                            'line'   => $i,
-                            'header' => $header,
-                            'tests'  => $buffer
-                          ),
-                          FALSE
-                        );
-
-                        $yuiPanelJS .= $yuiTemplate->render();
+                    if ($numTests > 1) {
+                        $popoverTitle = $numTests . ' tests cover line ' . $i;
+                    } else {
+                        $popoverTitle = '1 test covers line ' . $i;
                     }
+
+                    foreach ($coverageData[$i] as $test) {
+                        switch ($testData[$test]) {
+                            case 0: {
+                                $testCSS = ' class="success"';
+                            }
+                            break;
+
+                            case 1:
+                            case 2: {
+                                $testCSS = ' class="warning"';
+                            }
+                            break;
+
+                            case 3: {
+                                $testCSS = ' class="danger"';
+                            }
+                            break;
+
+                            case 4: {
+                                $testCSS = ' class="danger"';
+                            }
+                            break;
+
+                            default: {
+                                $testCSS = '';
+                            }
+                        }
+
+                        $popoverContent .= sprintf(
+                          '<li%s>%s</li>',
+
+                          $testCSS,
+                          htmlspecialchars($test)
+                        );
+                    }
+
+                    $popoverContent .= '</ul>';
                 }
-
-                $css = sprintf(
-                  '<span class="%s">       %s : ',
-
-                  $color,
-                  $count
-                );
             }
 
-            $_fillup = array_shift($fillup);
-
-            if ($_fillup > 0) {
-                $line .= str_repeat(' ', $_fillup);
+            if (!empty($popoverTitle)) {
+                $popover = sprintf(
+                  ' data-title="%s" data-content="%s" data-placement="bottom"',
+                  $popoverTitle,
+                  htmlspecialchars($popoverContent)
+                );
+            } else {
+                $popover = '';
             }
 
             $lines .= sprintf(
-              '<span class="lineNum" id="container%d"><a name="%d"></a>' .
-              '<a href="#%d" id="line%d">%8d</a> </span>%s%s%s' . "\n",
-
+              '     <tr%s%s><td><div align="right"><a name="%d"></a><a href="#%d">%d</a></div></td><td class="codeLine">%s</td></tr>' . "\n",
+              $trClass,
+              $popover,
               $i,
               $i,
               $i,
-              $i,
-              $i,
-              !empty($css) ? $css : '                : ',
-              !$this->highlight ? htmlspecialchars($line) : $line,
-              !empty($css) ? '</span>' : ''
+              !$this->highlight ? htmlspecialchars($line) : $line
             );
 
             $i++;
         }
 
-        return array($lines, $yuiPanelJS);
+        return $lines;
     }
 
     /**
@@ -480,24 +412,17 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
     {
         $buffer = file_get_contents($file);
         $lines  = explode("\n", str_replace("\t", '    ', $buffer));
-        $fillup = array();
         $result = array();
 
         if (count($lines) == 0) {
             return $result;
         }
 
-        $lines       = array_map('rtrim', $lines);
-        $linesLength = array_map('strlen', $lines);
-        $width       = max($linesLength);
-
-        foreach ($linesLength as $line => $length) {
-            $fillup[$line] = $width - $length;
-        }
+        $lines = array_map('rtrim', $lines);
 
         if (!$this->highlight) {
             unset($lines[count($lines)-1]);
-            return array($lines, $fillup);
+            return $lines;
         }
 
         $tokens     = token_get_all($buffer);
@@ -591,6 +516,7 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
                                 case T_INCLUDE_ONCE:
                                 case T_INSTANCEOF:
                                 case T_INSTEADOF:
+                                case T_INTERFACE:
                                 case T_ISSET:
                                 case T_LOGICAL_AND:
                                 case T_LOGICAL_OR:
@@ -638,6 +564,6 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
 
         unset($result[count($result)-1]);
 
-        return array($result, $fillup);
+        return $result;
     }
 }

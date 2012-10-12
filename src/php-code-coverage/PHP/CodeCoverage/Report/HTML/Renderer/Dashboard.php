@@ -51,7 +51,6 @@
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.1.0
  */
@@ -60,20 +59,15 @@ class PHP_CodeCoverage_Report_HTML_Renderer_Dashboard extends PHP_CodeCoverage_R
     /**
      * @param PHP_CodeCoverage_Report_Node_Directory $node
      * @param string                                 $file
-     * @param string                                 $title
      */
-    public function render(PHP_CodeCoverage_Report_Node_Directory $node, $file, $title = NULL)
+    public function render(PHP_CodeCoverage_Report_Node_Directory $node, $file)
     {
-        if ($title === NULL) {
-            $title = $node->getName();
-        }
-
         $classes  = $node->getClassesAndTraits();
         $template = new Text_Template(
           $this->templatePath . 'dashboard.html'
         );
 
-        $this->setCommonTemplateVariables($template, $title);
+        $this->setCommonTemplateVariables($template, $node);
 
         $template->setVar(
           array(
@@ -232,5 +226,31 @@ class PHP_CodeCoverage_Report_HTML_Renderer_Dashboard extends PHP_CodeCoverage_R
         }
 
         return $buffer;
+    }
+
+    protected function getBreadcrumbs(PHP_CodeCoverage_Report_Node $node)
+    {
+        $breadcrumbs = '';
+
+        $path = $node->getPathAsArray();
+
+        foreach ($path as $step) {
+            if ($step !== $node) {
+                $breadcrumbs .= sprintf(
+                  '        <li><a href="%s.html">%s</a> <span class="divider">/</span></li>' . "\n",
+                  $step->getId(),
+                  $step->getName()
+                );
+            } else {
+                $breadcrumbs .= sprintf(
+                  '        <li><a href="%s.html">%s</a></li>' . "\n" .
+                  '        <li class="active">(Dashboard)</li>' . "\n",
+                  $step->getId(),
+                  $step->getName()
+                );
+            }
+        }
+
+        return $breadcrumbs;
     }
 }

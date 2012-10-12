@@ -51,7 +51,6 @@
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.0.0
  * @codeCoverageIgnore
@@ -67,8 +66,7 @@ class PHP_CodeCoverage_Driver_Xdebug implements PHP_CodeCoverage_Driver
             throw new PHP_CodeCoverage_Exception('Xdebug is not loaded.');
         }
 
-        if (version_compare(phpversion('xdebug'), '2.2.0-dev', '>=') &&
-            !ini_get('xdebug.coverage_enable')) {
+        if (version_compare(phpversion('xdebug'), '2.2.0-dev', '>=') && !ini_get('xdebug.coverage_enable')) {
             throw new PHP_CodeCoverage_Exception(
               'You need to set xdebug.coverage_enable=On in your php.ini.'
             );

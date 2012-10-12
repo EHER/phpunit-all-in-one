@@ -92,7 +92,6 @@
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
@@ -848,6 +847,9 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
             $this->statusMessage = $e->getMessage();
         }
 
+        // Clean up the mock objects.
+        $this->mockObjects = array();
+
         // Tear down the fixture. An exception raised in tearDown() will be
         // caught and passed on when no exception was raised before.
         try {
@@ -1045,8 +1047,6 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
             $mockObject->__phpunit_verify();
             $mockObject->__phpunit_cleanup();
         }
-
-        $this->mockObjects = array();
     }
 
     /**
@@ -1297,7 +1297,7 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
      * @throws PHPUnit_Framework_Exception
      * @since  Method available since Release 3.0.0
      */
-    public function getMock($originalClassName, $methods = array(), array $arguments = array(), $mockClassName = '', $callOriginalConstructor = TRUE, $callOriginalClone = TRUE, $callAutoload = TRUE, $cloneArguments = TRUE)
+    public function getMock($originalClassName, $methods = array(), array $arguments = array(), $mockClassName = '', $callOriginalConstructor = TRUE, $callOriginalClone = TRUE, $callAutoload = TRUE, $cloneArguments = FALSE)
     {
         $mockObject = PHPUnit_Framework_MockObject_Generator::getMock(
           $originalClassName,
@@ -1344,7 +1344,7 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
      * @throws PHPUnit_Framework_Exception
      * @since  Method available since Release 3.5.0
      */
-    protected function getMockClass($originalClassName, $methods = array(), array $arguments = array(), $mockClassName = '', $callOriginalConstructor = FALSE, $callOriginalClone = TRUE, $callAutoload = TRUE, $cloneArguments = TRUE)
+    protected function getMockClass($originalClassName, $methods = array(), array $arguments = array(), $mockClassName = '', $callOriginalConstructor = FALSE, $callOriginalClone = TRUE, $callAutoload = TRUE, $cloneArguments = FALSE)
     {
         $mock = $this->getMock(
           $originalClassName,
@@ -1377,7 +1377,7 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
      * @since  Method available since Release 3.4.0
      * @throws PHPUnit_Framework_Exception
      */
-    public function getMockForAbstractClass($originalClassName, array $arguments = array(), $mockClassName = '', $callOriginalConstructor = TRUE, $callOriginalClone = TRUE, $callAutoload = TRUE, $mockedMethods = array(), $cloneArguments = TRUE)
+    public function getMockForAbstractClass($originalClassName, array $arguments = array(), $mockClassName = '', $callOriginalConstructor = TRUE, $callOriginalClone = TRUE, $callAutoload = TRUE, $mockedMethods = array(), $cloneArguments = FALSE)
     {
         $mockObject = PHPUnit_Framework_MockObject_Generator::getMockForAbstractClass(
           $originalClassName,
@@ -1447,7 +1447,7 @@ abstract class PHPUnit_Framework_TestCase extends PHPUnit_Framework_Assert imple
      * @since  Method available since Release 3.6.0
      * @throws PHPUnit_Framework_Exception
      */
-    protected function getObjectForTrait($traitName, array $arguments = array(), $traitClassName = '', $callOriginalConstructor = TRUE, $callOriginalClone = TRUE, $callAutoload = TRUE, $cloneArguments = TRUE)
+    protected function getObjectForTrait($traitName, array $arguments = array(), $traitClassName = '', $callOriginalConstructor = TRUE, $callOriginalClone = TRUE, $callAutoload = TRUE, $cloneArguments = FALSE)
     {
         return PHPUnit_Framework_MockObject_Generator::getObjectForTrait(
           $traitName,

@@ -51,7 +51,6 @@
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.0.0
  */
@@ -70,7 +69,7 @@ class PHP_CodeCoverage
     /**
      * @var boolean
      */
-    protected $cacheTokens = TRUE;
+    protected $cacheTokens = FALSE;
 
     /**
      * @var boolean
@@ -81,6 +80,11 @@ class PHP_CodeCoverage
      * @var boolean
      */
     protected $mapTestClassNameToCoveredClassName = FALSE;
+
+    /**
+     * @var boolean
+     */
+    protected $addUncoveredFilesFromWhitelist = TRUE;
 
     /**
      * @var boolean
@@ -168,7 +172,9 @@ class PHP_CodeCoverage
      */
     public function getData()
     {
-        $this->processUncoveredFilesFromWhitelist();
+        if ($this->addUncoveredFilesFromWhitelist) {
+            $this->addUncoveredFilesFromWhitelist();
+        }
 
         // We need to apply the blacklist filter a second time
         // when no whitelist is used.
@@ -386,6 +392,21 @@ class PHP_CodeCoverage
      * @param  boolean $flag
      * @throws PHP_CodeCoverage_Exception
      */
+    public function setAddUncoveredFilesFromWhitelist($flag)
+    {
+        if (!is_bool($flag)) {
+            throw PHP_CodeCoverage_Util_InvalidArgumentHelper::factory(
+              1, 'boolean'
+            );
+        }
+
+        $this->addUncoveredFilesFromWhitelist = $flag;
+    }
+
+    /**
+     * @param  boolean $flag
+     * @throws PHP_CodeCoverage_Exception
+     */
     public function setProcessUncoveredFilesFromWhitelist($flag)
     {
         if (!is_bool($flag)) {
@@ -477,7 +498,7 @@ class PHP_CodeCoverage
     /**
      * Processes whitelisted files that are not covered.
      */
-    protected function processUncoveredFilesFromWhitelist()
+    protected function addUncoveredFilesFromWhitelist()
     {
         $data           = array();
         $uncoveredFiles = array_diff(
@@ -510,44 +531,10 @@ class PHP_CodeCoverage
     /**
      * @param string $uncoveredFile
      * @param array  $data
+     * @param array  $uncoveredFiles
      */
     protected function processUncoveredFileFromWhitelist($uncoveredFile, array &$data, array $uncoveredFiles)
     {
-        if ($this->cacheTokens) {
-            $tokens = PHP_Token_Stream_CachingFactory::get($uncoveredFile);
-        } else {
-            $tokens = new PHP_Token_Stream($uncoveredFile);
-        }
-
-        $classes    = $tokens->getClasses();
-        $interfaces = $tokens->getInterfaces();
-        $functions  = $tokens->getFunctions();
-        unset($tokens);
-
-        foreach (array_keys($classes) as $class) {
-            if (class_exists($class, FALSE)) {
-                continue;
-            }
-        }
-
-        unset($classes);
-
-        foreach (array_keys($interfaces) as $interface) {
-            if (interface_exists($interface, FALSE)) {
-                continue;
-            }
-        }
-
-        unset($interfaces);
-
-        foreach (array_keys($functions) as $function) {
-            if (function_exists($function)) {
-                continue;
-            }
-        }
-
-        unset($functions);
-
         $this->driver->start();
         include_once $uncoveredFile;
         $coverage = $this->driver->stop();
@@ -595,7 +582,7 @@ class PHP_CodeCoverage
             return array();
         }
 
-        $docComment = $class->getDocComment() . $method->getDocComment();
+        $docComment = substr($class->getDocComment(), 3, -2) . PHP_EOL . substr($method->getDocComment(), 3, -2);
 
         $templateMethods = array(
           'setUp', 'assertPreConditions', 'assertPostConditions', 'tearDown'
@@ -604,7 +591,7 @@ class PHP_CodeCoverage
         foreach ($templateMethods as $templateMethod) {
             if ($class->hasMethod($templateMethod)) {
                 $reflector   = $class->getMethod($templateMethod);
-                $docComment .= $reflector->getDocComment();
+                $docComment .= PHP_EOL . substr($reflector->getDocComment(), 3, -2);
                 unset($reflector);
             }
         }
@@ -633,7 +620,7 @@ class PHP_CodeCoverage
         }
 
         $match = preg_match_all(
-          '(@covers\s+(?P<coveredElement>.*?)\s*$)m',
+          '(@covers\s+(?P<coveredElement>.*?)\s*(\(\s*\))?\s*$)m',
           $docComment,
           $matches
         );

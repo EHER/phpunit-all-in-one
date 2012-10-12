@@ -51,7 +51,6 @@
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.1.0
  */
@@ -138,8 +137,11 @@ class PHPUnit_Util_Class
         foreach ($method->getParameters() as $i => $parameter) {
             $name = '$' . $parameter->getName();
 
-            if ($name === '$') {
-                $name .= 'arg' . $i;
+            /* Note: PHP extensions may use empty names for reference arguments
+             * or "..." for methods taking a variable number of arguments.
+             */
+            if ($name === '$' || $name === '$...') {
+                $name = '$arg' . $i;
             }
 
             $default   = '';
@@ -151,8 +153,7 @@ class PHPUnit_Util_Class
                     $typeHint = 'array ';
                 }
 
-                else if (version_compare(PHP_VERSION, '5.4', '>') &&
-                         $parameter->isCallable()) {
+                else if ($parameter->isCallable()) {
                     $typeHint = 'callable ';
                 }
 

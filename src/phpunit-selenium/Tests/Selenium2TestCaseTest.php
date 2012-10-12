@@ -195,7 +195,7 @@ class Extensions_Selenium2TestCaseTest extends Tests_Selenium2TestCase_BaseTestC
     {
         $this->url('html/test_geometry.html');
         $element = $this->byId('colored');
-        $this->assertEquals('rgba(0,0,255,1)', $element->css('background-color'));
+        $this->assertRegExp('/rgba\(0,\s*0,\s*255,\s*1\)/', $element->css('background-color'));
     }
 
     public function testClick()
@@ -276,6 +276,16 @@ class Extensions_Selenium2TestCaseTest extends Tests_Selenium2TestCase_BaseTestC
         $this->clickOnElement('submitButton');
         $h2 = $this->byCssSelector('h2');
         $this->assertRegExp('/Welcome, TestUser!/', $h2->text());
+    }
+
+    /**
+     * #165
+     */
+    public function testNumericValuesCanBeTyped()
+    {
+        $this->url('html/test_type_page1.html');
+        $usernameInput = $this->byName('username');
+        $usernameInput->value(1.13);
     }
 
     public function testFormsCanBeSubmitted()
@@ -363,6 +373,20 @@ class Extensions_Selenium2TestCaseTest extends Tests_Selenium2TestCase_BaseTestC
 
         $select->selectOptionByValue("option2");
         $this->assertEquals("option2", $select->selectedValue());
+    }
+
+    /**
+     * Ticket 170
+     */
+    public function testSelectOptgroupDoNotGetInTheWay(){
+        $this->url('html/test_select.html');
+        $select = $this->select($this->byCssSelector('#selectWithOptgroup'));
+
+        $select->selectOptionByLabel("Second");
+        $this->assertEquals("2", $select->selectedValue());
+
+        $select->selectOptionByValue("1");
+        $this->assertEquals("1", $select->selectedValue());
     }
 
     public function testCheckboxesCanBeSelectedAndDeselected()
@@ -479,7 +503,7 @@ class Extensions_Selenium2TestCaseTest extends Tests_Selenium2TestCase_BaseTestC
         $this->assertContains('{focus(theSubmit)} {click(theSubmit)} {submit}', $eventLog->value());
     }
 
-    public function testSelectEventsAreGenerated()
+    public function testSelectEventsAreGeneratedbutOnlyIfANewSelectionIsMade()
     {
         $this->url('html/test_form_events.html');
         $select = $this->select($this->byId('theSelect'));
@@ -495,10 +519,7 @@ class Extensions_Selenium2TestCaseTest extends Tests_Selenium2TestCase_BaseTestC
         $eventLog->clear();
         $select->selectOptionByLabel('First Option');
         $this->assertEquals('option1', $select->selectedValue());
-        $this->assertContains('{focus(theSelect)}', $eventLog->value());
-
-        $this->markTestIncomplete('Why the change event is launched?');
-        $this->assertNotContains('{change(theSelect)}', $eventLog->value());
+        $this->assertEquals('', $eventLog->value());
     }
     
     public function testRadioEventsAreGenerated()

@@ -49,7 +49,7 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.8
+ * @version    Release: 1.2.9
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.8
  */
@@ -74,8 +74,11 @@ class PHPUnit_Extensions_Selenium2TestCase_ScreenshotListener implements PHPUnit
  
     private function storeAScreenshot(PHPUnit_Framework_Test $test)
     {
-        $file = $this->directory . '/' . get_class($test) . '__' . $test->getName() . '__ ' . date('Y-m-d\TH:i:s') . '.png';
-        file_put_contents($file,        $test->currentScreenshot());
+        if ($test instanceof PHPUnit_Extensions_Selenium2TestCase)
+        {
+            $file = $this->directory . '/' . get_class($test) . '__' . $test->getName() . '__ ' . date('Y-m-d\TH-i-s') . '.png';
+            file_put_contents($file,        $test->currentScreenshot());
+        }
     }
  
     public function addIncompleteTest(PHPUnit_Framework_Test $test, Exception $e, $time) {} 

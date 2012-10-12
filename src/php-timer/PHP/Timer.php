@@ -51,7 +51,7 @@
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2010-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.0.2
+ * @version    Release: 1.0.4
  * @link       http://github.com/sebastianbergmann/php-timer
  * @since      Class available since Release 1.0.0
  */

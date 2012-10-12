@@ -53,7 +53,7 @@
  * <phpunit backupGlobals="true"
  *          backupStaticAttributes="false"
  *          bootstrap="/path/to/bootstrap.php"
- *          cacheTokens="true"
+ *          cacheTokens="false"
  *          colors="false"
  *          convertErrorsToExceptions="true"
  *          convertNoticesToExceptions="true"
@@ -98,7 +98,8 @@
  *         <file>/path/to/file</file>
  *       </exclude>
  *     </blacklist>
- *     <whitelist processUncoveredFilesFromWhitelist="false">
+ *     <whitelist addUncoveredFilesFromWhitelist="true"
+ *                processUncoveredFilesFromWhitelist="false">
  *       <directory suffix=".php">/path/to/files</directory>
  *       <file>/path/to/file</file>
  *       <exclude>
@@ -128,8 +129,8 @@
  *   </listeners>
  *
  *   <logging>
- *     <log type="coverage-html" target="/tmp/report" title="My Project"
-            charset="UTF-8" yui="true" highlight="false"
+ *     <log type="coverage-html" target="/tmp/report"
+            charset="UTF-8" highlight="false"
  *          lowUpperBound="35" highLowerBound="70"/>
  *     <log type="coverage-clover" target="/tmp/clover.xml"/>
  *     <log type="json" target="/tmp/logfile.json"/>
@@ -169,7 +170,6 @@
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
  */
@@ -189,7 +189,7 @@ class PHPUnit_Util_Configuration
     protected function __construct($filename)
     {
         $this->filename = $filename;
-        $this->document = PHPUnit_Util_XML::loadFile($filename);
+        $this->document = PHPUnit_Util_XML::loadFile($filename, FALSE, TRUE);
         $this->xpath    = new DOMXPath($this->document);
     }
 
@@ -246,18 +246,29 @@ class PHPUnit_Util_Configuration
      */
     public function getFilterConfiguration()
     {
+        $addUncoveredFilesFromWhitelist     = TRUE;
         $processUncoveredFilesFromWhitelist = FALSE;
 
         $tmp = $this->xpath->query('filter/whitelist');
 
-        if ($tmp->length == 1 &&
-            $tmp->item(0)->hasAttribute('processUncoveredFilesFromWhitelist')) {
-            $processUncoveredFilesFromWhitelist = $this->getBoolean(
-              (string)$tmp->item(0)->getAttribute(
-                'processUncoveredFilesFromWhitelist'
-              ),
-              FALSE
-            );
+        if ($tmp->length == 1) {
+            if ($tmp->item(0)->hasAttribute('addUncoveredFilesFromWhitelist')) {
+                $addUncoveredFilesFromWhitelist = $this->getBoolean(
+                  (string)$tmp->item(0)->getAttribute(
+                    'addUncoveredFilesFromWhitelist'
+                  ),
+                  TRUE
+                );
+            }
+
+            if ($tmp->item(0)->hasAttribute('processUncoveredFilesFromWhitelist')) {
+                $processUncoveredFilesFromWhitelist = $this->getBoolean(
+                  (string)$tmp->item(0)->getAttribute(
+                    'processUncoveredFilesFromWhitelist'
+                  ),
+                  FALSE
+                );
+            }
         }
 
         return array(
@@ -280,6 +291,7 @@ class PHPUnit_Util_Configuration
             )
           ),
           'whitelist' => array(
+            'addUncoveredFilesFromWhitelist' => $addUncoveredFilesFromWhitelist,
             'processUncoveredFilesFromWhitelist' => $processUncoveredFilesFromWhitelist,
             'include' => array(
               'directory' => $this->readFilterDirectories(
@@ -402,13 +414,6 @@ class PHPUnit_Util_Configuration
 
                 if ($log->hasAttribute('highLowerBound')) {
                     $result['highLowerBound'] = (string)$log->getAttribute('highLowerBound');
-                }
-
-                if ($log->hasAttribute('yui')) {
-                    $result['yui'] = $this->getBoolean(
-                      (string)$log->getAttribute('yui'),
-                      TRUE
-                    );
                 }
 
                 if ($log->hasAttribute('highlight')) {
@@ -559,7 +564,7 @@ class PHPUnit_Util_Configuration
 
         if ($root->hasAttribute('cacheTokens')) {
             $result['cacheTokens'] = $this->getBoolean(
-              (string)$root->getAttribute('cacheTokens'), TRUE
+              (string)$root->getAttribute('cacheTokens'), FALSE
             );
         }
 

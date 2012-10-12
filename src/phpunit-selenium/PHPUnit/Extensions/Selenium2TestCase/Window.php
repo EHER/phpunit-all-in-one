@@ -49,11 +49,12 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.8
+ * @version    Release: 1.2.9
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.5
  * @method array size(array $size = null) Window size as array('width' => $x, 'height' => $y)
  * @method array position(array $position = null) Window position as array('x' => $x, 'y' => $y)
+ * @method array maximize() Maximize window
  */
 class PHPUnit_Extensions_Selenium2TestCase_Window extends PHPUnit_Extensions_Selenium2TestCase_CommandsHolder
 {
@@ -64,7 +65,8 @@ class PHPUnit_Extensions_Selenium2TestCase_Window extends PHPUnit_Extensions_Sel
     {
         return array(
             'size' => 'PHPUnit_Extensions_Selenium2TestCase_StateCommand',
-            'position' => 'PHPUnit_Extensions_Selenium2TestCase_StateCommand'
+            'position' => 'PHPUnit_Extensions_Selenium2TestCase_StateCommand',
+            'maximize' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
         );
     }
 

@@ -51,7 +51,7 @@ namespace SebastianBergmann\FinderFacade
      * @author    Sebastian Bergmann <sb@sebastian-bergmann.de>
      * @copyright 2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
      * @license   http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
-     * @version   Release: 1.0.3
+     * @version   Release: 1.0.5
      * @link      http://github.com/sebastianbergmann/finder-facade/tree
      * @since     Class available since Release 1.0.0
      */

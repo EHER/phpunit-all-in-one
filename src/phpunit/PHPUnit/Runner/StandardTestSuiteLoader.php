@@ -51,7 +51,6 @@
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
@@ -135,7 +134,7 @@ class PHPUnit_Runner_StandardTestSuiteLoader implements PHPUnit_Runner_TestSuite
 
         throw new PHPUnit_Framework_Exception(
           sprintf(
-            'Class %s could not be found in %s.',
+            "Class '%s' could not be found in '%s'.",
 
             $suiteClassName,
             $suiteClassFile

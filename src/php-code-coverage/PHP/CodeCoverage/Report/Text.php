@@ -53,14 +53,12 @@
  * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.0
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.1.0
  */
 class PHP_CodeCoverage_Report_Text
 {
     protected $outputStream;
-    protected $title;
     protected $lowUpperBound;
     protected $highLowerBound;
     protected $showUncoveredFiles;
@@ -74,10 +72,9 @@ class PHP_CodeCoverage_Report_Text
       'eol'    => "\x1b[2K",
     );
 
-    public function __construct(PHPUnit_Util_Printer $outputStream, $title, $lowUpperBound, $highLowerBound, $showUncoveredFiles)
+    public function __construct(PHPUnit_Util_Printer $outputStream, $lowUpperBound, $highLowerBound, $showUncoveredFiles)
     {
         $this->outputStream       = $outputStream;
-        $this->title              = $title;
         $this->lowUpperBound      = $lowUpperBound;
         $this->highLowerBound     = $highLowerBound;
         $this->showUncoveredFiles = $showUncoveredFiles;
@@ -124,10 +121,6 @@ class PHP_CodeCoverage_Report_Text
 
         $output .= PHP_EOL . PHP_EOL .
                    $colors['header'] . 'Code Coverage Report ';
-
-        if ($this->title) {
-            $output .= 'for "' . $this->title . '"';
-        }
 
         $output .= PHP_EOL .
                    date('  Y-m-d H:i:s', $_SERVER['REQUEST_TIME']) .
@@ -252,7 +245,7 @@ class PHP_CodeCoverage_Report_Text
             }
         }
 
-        $this->outputStream->write($output);
+        $this->outputStream->write($output . PHP_EOL);
     }
 
     protected function getCoverageColor($numberOfCoveredElements, $totalNumberOfElements)

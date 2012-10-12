@@ -49,7 +49,7 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.8
+ * @version    Release: 1.2.9
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.2
  */
@@ -81,12 +81,56 @@ class PHPUnit_Extensions_Selenium2TestCase_Element_Select
     }
 
     /**
+     * @return string
+     */
+    public function selectedId()
+    {
+        return $this->selectedOption()->attribute('id');
+    }
+
+    /**
+     * @return array
+     */
+    public function selectedLabels()
+    {
+        $labels = array();
+        foreach ($this->selectedOptions() as $option) {
+            $labels[] = $option->text();
+        }
+        return $labels;
+    }
+
+    /**
+     * @return array
+     */
+    public function selectedValues()
+    {
+        $values = array();
+        foreach ($this->selectedOptions() as $option) {
+            $values[] = $option->value();
+        }
+        return $values;
+    }
+
+    /**
+     * @return array
+     */
+    public function selectedIds()
+    {
+        $id = array();
+        foreach ($this->selectedOptions() as $option) {
+            $values[] = $option->attribute('id');
+        }
+        return $id;
+    }
+
+    /**
      * @param string $label the text appearing in the option
      * @return void
      */
     public function selectOptionByLabel($label)
     {
-        $toSelect = $this->criteria('xpath')->value("option[.='$label']");
+        $toSelect = $this->criteria('xpath')->value(".//option[.='$label']");
         $this->selectOptionByCriteria($toSelect);
     }
 
@@ -96,7 +140,7 @@ class PHPUnit_Extensions_Selenium2TestCase_Element_Select
      */
     public function selectOptionByValue($value)
     {
-        $toSelect = $this->criteria('xpath')->value("option[@value='$value']");
+        $toSelect = $this->criteria('xpath')->value(".//option[@value='$value']");
         $this->selectOptionByCriteria($toSelect);
     }
 
@@ -107,7 +151,47 @@ class PHPUnit_Extensions_Selenium2TestCase_Element_Select
     public function selectOptionByCriteria(PHPUnit_Extensions_Selenium2TestCase_ElementCriteria $localCriteria)
     {
         $option = $this->element($localCriteria);
-        $option->click();
+        if (!$option->selected()) {
+            $option->click();
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function selectOptionValues()
+    {
+        $options = array();
+        foreach ($this->options() as $option) {
+            $options[] = $option->value();
+        }
+        return $options;
+    }
+
+    /**
+     * @return array
+     */
+    public function selectOptionLabels()
+    {
+        $options = array();
+        foreach ($this->options() as $option) {
+            $options[] = $option->text();
+        }
+        return $options;
+    }
+
+    /***
+     * @return array
+     */
+    private function selectedOptions()
+    {
+        $options = array();
+        foreach ($this->options() as $option) {
+            if ($option->selected()) {
+                $options[] = $option;
+            }
+        }
+        return $options;
     }
 
     private function selectedOption()

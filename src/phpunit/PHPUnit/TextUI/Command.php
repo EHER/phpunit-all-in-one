@@ -52,7 +52,6 @@
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
  */
@@ -515,14 +514,6 @@ class PHPUnit_TextUI_Command
         $this->handleCustomTestSuite();
 
         if (!isset($this->arguments['test'])) {
-            if (count($this->options[1]) > 2) {
-                $this->showMessage(
-                    'More than two positional arguments provided.',
-                    FALSE
-                );
-                $this->showHelp();
-                exit(PHPUnit_TextUI_TestRunner::FAILURE_EXIT);
-            }
 
             if (isset($this->options[1][0])) {
                 $this->arguments['test'] = $this->options[1][0];

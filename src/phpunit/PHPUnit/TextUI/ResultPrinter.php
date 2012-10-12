@@ -51,7 +51,6 @@
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
@@ -275,16 +274,17 @@ class PHPUnit_TextUI_ResultPrinter extends PHPUnit_Util_Printer implements PHPUn
           )
         );
         
-        $e = $defect->thrownException()->getPrevious();                
+        $e = $defect->thrownException()->getPrevious();
+
         while ($e) {
-            $this->write(
-                "\nCaused by\n" .
-                PHPUnit_Framework_TestFailure::exceptionToString($e). "\n" .
-                PHPUnit_Util_Filter::getFilteredStacktrace($e)
-            );
-            $e = $e->getPrevious();
-        }        
-        
+          $this->write(
+            "\nCaused by\n" .
+            PHPUnit_Framework_TestFailure::exceptionToString($e). "\n" .
+            PHPUnit_Util_Filter::getFilteredStacktrace($e)
+          );
+
+          $e = $e->getPrevious();
+        }
     }
 
     /**
@@ -342,7 +342,21 @@ class PHPUnit_TextUI_ResultPrinter extends PHPUnit_Util_Printer implements PHPUn
      */
     protected function printFooter(PHPUnit_Framework_TestResult $result)
     {
-        if ($result->wasSuccessful() &&
+        if (count($result) === 0) {
+            if ($this->colors) {
+                $this->write("\x1b[30;43m\x1b[2K");
+            }
+
+            $this->write(
+              "No tests executed!\n"
+            );
+
+            if ($this->colors) {
+                $this->write("\x1b[0m\x1b[2K");
+            }
+        }
+
+        else if ($result->wasSuccessful() &&
             $result->allCompletlyImplemented() &&
             $result->noneSkipped()) {
             if ($this->colors) {

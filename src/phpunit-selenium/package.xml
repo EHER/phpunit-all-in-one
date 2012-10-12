@@ -17,9 +17,9 @@
   <email>sb@sebastian-bergmann.de</email>
   <active>yes</active>
  </lead>
- <date>2012-08-08</date>
+ <date>2012-09-28</date>
  <version>
-  <release>1.2.8</release>
+  <release>1.2.9</release>
   <api>1.2.1</api>
  </version>
  <stability>
@@ -61,6 +61,9 @@
         <tasks:replace from="@package_version@" to="version" type="package-info" />
        </file>
        <file baseinstalldir="/" name="GenericAccessor.php" role="php">
+        <tasks:replace from="@package_version@" to="version" type="package-info" />
+       </file>
+       <file baseinstalldir="/" name="GenericAttribute.php" role="php">
         <tasks:replace from="@package_version@" to="version" type="package-info" />
        </file>
        <file baseinstalldir="/" name="GenericPost.php" role="php">
@@ -127,6 +130,12 @@
         <tasks:replace from="@package_version@" to="version" type="package-info" />
        </file>
        <file baseinstalldir="/" name="Window.php" role="php">
+        <tasks:replace from="@package_version@" to="version" type="package-info" />
+       </file>
+       <file baseinstalldir="/" name="Location.php" role="php">
+        <tasks:replace from="@package_version@" to="version" type="package-info" />
+       </file>
+       <file baseinstalldir="/" name="Orientation.php" role="php">
         <tasks:replace from="@package_version@" to="version" type="package-info" />
        </file>
       </dir>
@@ -200,7 +209,7 @@
  <dependencies>
   <required>
    <php>
-    <min>5.2.7</min>
+    <min>5.3.3</min>
    </php>
    <pearinstaller>
     <min>1.9.4</min>
@@ -208,7 +217,7 @@
    <package>
     <name>PHPUnit</name>
     <channel>pear.phpunit.de</channel>
-    <min>3.6.0</min>
+    <min>3.7.0</min>
    </package>
    <extension>
     <name>curl</name>

@@ -49,7 +49,7 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.8
+ * @version    Release: 1.2.9
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.0
  * @method void acceptAlert() Press OK on an alert, or confirms a dialog
@@ -132,6 +132,25 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
             'window' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Window',
             'windowHandle' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_GenericAccessor',
             'windowHandles' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_GenericAccessor',
+            'touchDown' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
+            'touchUp' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
+            'touchMove' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
+            'touchScroll' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
+            'flick' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
+            'location' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Location',
+            'orientation' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Orientation'
+        );
+    }
+
+
+    protected function initCommandsMap()
+    {
+        $this->commandsMap = array(
+            'touchDown' => 'touch/down',
+            'touchUp' => 'touch/up',
+            'touchMove' => 'touch/move',
+            'touchScroll' => 'touch/scroll',
+            'flick' => 'touch/flick'
         );
     }
 
@@ -334,5 +353,15 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
     {
         $url = $this->url->addCommand('localStorage');
         return new PHPUnit_Extensions_Selenium2TestCase_Session_Storage($this->driver, $url);
+    }
+
+    public function landscape()
+    {
+        $this->orientation('LANDSCAPE');
+    }
+
+    public function portrait()
+    {
+        $this->orientation('PORTRAIT');
     }
 }

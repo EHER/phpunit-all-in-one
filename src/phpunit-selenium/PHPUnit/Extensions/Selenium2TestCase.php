@@ -51,7 +51,7 @@
  * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
  * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.8
+ * @version    Release: 1.2.9
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.0
  * @method void acceptAlert() Press OK on an alert, or confirms a dialog
@@ -85,7 +85,7 @@
  */
 abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_TestCase
 {
-    const VERSION = "1.2.7";
+    const VERSION = '1.2.9';
 
     /**
      * @var string  override to provide code coverage data from the server
@@ -105,17 +105,17 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
     /**
      * @var PHPUnit_Extensions_Selenium2TestCase_SessionStrategy
      */
-    private static $sessionStrategy;
+    protected static $sessionStrategy;
 
     /**
      * @var PHPUnit_Extensions_Selenium2TestCase_SessionStrategy
      */
-    private static $browserSessionStrategy;
+    protected static $browserSessionStrategy;
 
     /**
      * @var PHPUnit_Extensions_Selenium2TestCase_SessionStrategy
      */
-    private $localSessionStrategy;
+    protected $localSessionStrategy;
 
     /**
      * @var array
@@ -186,7 +186,7 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
             $params['seleniumServerRequestsTimeout']);
     }
 
-    private function setUpSessionStrategy($params)
+    protected function setUpSessionStrategy($params)
     {
         // This logic enables us to have a session strategy reused for each
         // item in self::$browsers. We don't want them both to share one
@@ -224,6 +224,7 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
     {
         if (!$this->session) {
             $this->session = $this->getStrategy()->session($this->parameters);
+            $this->url('');
         }
         return $this->session;
     }
@@ -263,7 +264,6 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
     protected function runTest()
     {
         $this->prepareSession();
-        $this->url('');
 
         $thrownException = NULL;
 
@@ -334,6 +334,11 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
         $this->parameters['host'] = $host;
     }
 
+    public function getHost()
+    {
+        return $this->parameters['host'];
+    }
+
     /**
      * @param  integer $port
      * @throws InvalidArgumentException
@@ -345,6 +350,11 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
         }
 
         $this->parameters['port'] = $port;
+    }
+
+    public function getPort()
+    {
+        return $this->parameters['port'];
     }
 
     /**
@@ -378,6 +388,14 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
         $this->parameters['browserUrl'] = new PHPUnit_Extensions_Selenium2TestCase_URL($browserUrl);
     }
 
+    public function getBrowserUrl()
+    {
+        if (isset($this->parameters['browserUrl'])) {
+            return $this->parameters['browserUrl'];
+        }
+        return '';
+    }
+
     /**
      * @see http://code.google.com/p/selenium/wiki/JsonWireProtocol
      */
@@ -386,11 +404,43 @@ abstract class PHPUnit_Extensions_Selenium2TestCase extends PHPUnit_Framework_Te
         $this->parameters['desiredCapabilities'] = $capabilities;
     }
 
+
+    public function getDesiredCapabilities()
+    {
+        return $this->parameters['desiredCapabilities'];
+    }
+
     /**
      * @param int $timeout  seconds
      */
     public function setSeleniumServerRequestsTimeout($timeout)
     {
         $this->parameters['seleniumServerRequestsTimeout'] = $timeout;
+    }
+
+    public function getSeleniumServerRequestsTimeout()
+    {
+        return $this->parameters['seleniumServerRequestsTimeout'];
+    }
+
+    /**
+     * Get test id (generated internally)
+     * @return string
+     */
+    public function getTestId()
+    {
+        return $this->testId;
+    }
+
+    /**
+     * Get Selenium2 current session id
+     * @return string
+     */
+    public function getSessionId()
+    {
+        if ($this->session)
+            return $this->session->id();
+
+        return FALSE;
     }
 }

@@ -52,7 +52,6 @@
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 3.6.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
@@ -248,22 +247,38 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
             );
         }
 
-        if ((isset($arguments['coverageClover']) ||
-             isset($arguments['reportDirectory']) ||
-             isset($arguments['coveragePHP']) ||
-             isset($arguments['coverageText'])) &&
-             extension_loaded('xdebug')) {
+        $codeCoverageReports = 0;
+
+        if (extension_loaded('xdebug')) {
+            if (isset($arguments['coverageClover'])) {
+                $codeCoverageReports++;
+            }
+
+            if (isset($arguments['reportDirectory'])) {
+                $codeCoverageReports++;
+            }
+
+            if (isset($arguments['coveragePHP'])) {
+                $codeCoverageReports++;
+            }
+
+            if (isset($arguments['coverageText'])) {
+                $codeCoverageReports++;
+            }
+        }
+
+        if ($codeCoverageReports > 0) {
             $codeCoverage = new PHP_CodeCoverage(
               NULL, $this->codeCoverageFilter
+            );
+
+            $codeCoverage->setAddUncoveredFilesFromWhitelist(
+              $arguments['addUncoveredFilesFromWhitelist']
             );
 
             $codeCoverage->setProcessUncoveredFilesFromWhitelist(
               $arguments['processUncoveredFilesFromWhitelist']
             );
-
-            if (isset($arguments['cacheTokens'])) {
-                $codeCoverage->setCacheTokens($arguments['cacheTokens']);
-            }
 
             if (isset($arguments['forceCoversAnnotation'])) {
                 $codeCoverage->setForceCoversAnnotation(
@@ -278,6 +293,12 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
             }
 
             $result->setCodeCoverage($codeCoverage);
+        }
+
+        if ($codeCoverageReports > 1) {
+            if (isset($arguments['cacheTokens'])) {
+                $codeCoverage->setCacheTokens($arguments['cacheTokens']);
+            }
         }
 
         if (isset($arguments['jsonLogfile'])) {
@@ -332,16 +353,6 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
         }
 
         if (isset($codeCoverage)) {
-            $title = '';
-
-            if (isset($arguments['configuration'])) {
-                $loggingConfiguration = $arguments['configuration']->getLoggingConfiguration();
-
-                if (isset($loggingConfiguration['title'])) {
-                    $title = $loggingConfiguration['title'];
-                }
-            }
-
             if (isset($arguments['coverageClover'])) {
                 $this->printer->write(
                   "\nGenerating code coverage report in Clover XML format ..."
@@ -360,13 +371,14 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
                 );
 
                 $writer = new PHP_CodeCoverage_Report_HTML(
-                  $title,
                   $arguments['reportCharset'],
-                  $arguments['reportYUI'],
                   $arguments['reportHighlight'],
                   $arguments['reportLowUpperBound'],
                   $arguments['reportHighLowerBound'],
-                  ' and PHPUnit ' . PHPUnit_Runner_Version::id()
+                  sprintf(
+                    ' and <a href="http://phpunit.de/">PHPUnit %s</a>',
+                    PHPUnit_Runner_Version::id()
+                  )
                 );
 
                 $writer->process($codeCoverage, $arguments['reportDirectory']);
@@ -398,7 +410,6 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
 
                 $writer = new PHP_CodeCoverage_Report_Text(
                   $outputStream,
-                  $title,
                   $arguments['reportLowUpperBound'],
                   $arguments['reportHighLowerBound'],
                   $arguments['coverageTextShowUncoveredFiles']
@@ -428,7 +439,7 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
     protected function runFailed($message)
     {
         self::printVersionString();
-        self::write($message);
+        self::write($message . PHP_EOL);
         exit(self::FAILURE_EXIT);
     }
 
@@ -637,11 +648,6 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
                     $arguments['reportCharset'] = $loggingConfiguration['charset'];
                 }
 
-                if (isset($loggingConfiguration['yui']) &&
-                    !isset($arguments['reportYUI'])) {
-                    $arguments['reportYUI'] = $loggingConfiguration['yui'];
-                }
-
                 if (isset($loggingConfiguration['highlight']) &&
                     !isset($arguments['reportHighlight'])) {
                     $arguments['reportHighlight'] = $loggingConfiguration['highlight'];
@@ -723,6 +729,7 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
                 extension_loaded('xdebug')) {
 
                 $filterConfiguration = $arguments['configuration']->getFilterConfiguration();
+                $arguments['addUncoveredFilesFromWhitelist'] = $filterConfiguration['whitelist']['addUncoveredFilesFromWhitelist'];
                 $arguments['processUncoveredFilesFromWhitelist'] = $filterConfiguration['whitelist']['processUncoveredFilesFromWhitelist'];
 
                 foreach ($filterConfiguration['blacklist']['include']['directory'] as $dir) {
@@ -767,10 +774,11 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
             }
         }
 
+        $arguments['addUncoveredFilesFromWhitelist']     = isset($arguments['addUncoveredFilesFromWhitelist'])     ? $arguments['addUncoveredFilesFromWhitelist']     : TRUE;
         $arguments['processUncoveredFilesFromWhitelist'] = isset($arguments['processUncoveredFilesFromWhitelist']) ? $arguments['processUncoveredFilesFromWhitelist'] : FALSE;
         $arguments['backupGlobals']                      = isset($arguments['backupGlobals'])                      ? $arguments['backupGlobals']                      : NULL;
         $arguments['backupStaticAttributes']             = isset($arguments['backupStaticAttributes'])             ? $arguments['backupStaticAttributes']             : NULL;
-        $arguments['cacheTokens']                        = isset($arguments['cacheTokens'])                        ? $arguments['cacheTokens']                        : TRUE;
+        $arguments['cacheTokens']                        = isset($arguments['cacheTokens'])                        ? $arguments['cacheTokens']                        : FALSE;
         $arguments['colors']                             = isset($arguments['colors'])                             ? $arguments['colors']                             : FALSE;
         $arguments['convertErrorsToExceptions']          = isset($arguments['convertErrorsToExceptions'])          ? $arguments['convertErrorsToExceptions']          : TRUE;
         $arguments['convertNoticesToExceptions']         = isset($arguments['convertNoticesToExceptions'])         ? $arguments['convertNoticesToExceptions']         : TRUE;
@@ -784,7 +792,6 @@ class PHPUnit_TextUI_TestRunner extends PHPUnit_Runner_BaseTestRunner
         $arguments['reportHighlight']                    = isset($arguments['reportHighlight'])                    ? $arguments['reportHighlight']                    : FALSE;
         $arguments['reportHighLowerBound']               = isset($arguments['reportHighLowerBound'])               ? $arguments['reportHighLowerBound']               : 70;
         $arguments['reportLowUpperBound']                = isset($arguments['reportLowUpperBound'])                ? $arguments['reportLowUpperBound']                : 35;
-        $arguments['reportYUI']                          = isset($arguments['reportYUI'])                          ? $arguments['reportYUI']                          : TRUE;
         $arguments['stopOnError']                        = isset($arguments['stopOnError'])                        ? $arguments['stopOnError']                        : FALSE;
         $arguments['stopOnFailure']                      = isset($arguments['stopOnFailure'])                      ? $arguments['stopOnFailure']                      : FALSE;
         $arguments['stopOnIncomplete']                   = isset($arguments['stopOnIncomplete'])                   ? $arguments['stopOnIncomplete']                   : FALSE;
