@@ -42,6 +42,7 @@
  * @since      File available since Release 3.5.0
  */
 
+require_once __DIR__ . '/../../../bin/init.php';
 require_once 'File/Iterator/Autoload.php';
 require_once 'PHP/CodeCoverage/Autoload.php';
 require_once 'PHP/Timer/Autoload.php';

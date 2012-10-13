@@ -97,6 +97,12 @@ fix_sources() {
     sed "s/\(\$libraryMode =[ ]*\).*/\1'pear';/g" -i $EZC_ROOT/Base/base.php
 }
 
+fix_autoloader() {
+    cd $VENDOR
+    sed "s/\(require_once 'File\/Iterator.*\)/require_once __DIR__ \. '\/..\/..\/..\/bin\/init\.php';\n\1/" \
+        -i $VENDOR/phpunit/PHPUnit/Autoload.php -i $VENDOR/phpunit/PHPUnit/Autoload.php.in
+}
+
 rm -rf "$VENDOR"
 _init
 download
@@ -106,4 +112,5 @@ fix_ezc
 fix_finder_facade
 fix_eoln
 fix_sources
+fix_autoloader
 clean
