@@ -30,7 +30,8 @@ phpcov
 phploc
 phpcpd
 phpdcd
-finder-facade"
+finder-facade
+version"
 
     for i in $PKGS ; do
         git clone git://github.com/sebastianbergmann/$i.git
@@ -38,6 +39,7 @@ finder-facade"
     git clone git://github.com/theseer/fDOMDocument.git
     git clone git://github.com/naderman/ezc-base.git $EZC_TMP/Base
     git clone git://github.com/naderman/ezc-console-tools.git $EZC_TMP/ConsoleTools
+
     [ "$COMPOSER_ONLY" ] || git clone git://github.com/symfony/Finder.git symfony-finder/Symfony/Component/Finder
     [ "$COMPOSER_ONLY" ] || git clone git://github.com/symfony/Yaml symfony-yaml/Symfony/Component/Yaml
     [ "$COMPOSER_ONLY" ] || git clone git://github.com/symfony/ClassLoader.git symfony-class-loader/Symfony/Component/ClassLoader
@@ -57,6 +59,10 @@ fix_version() {
 }
 
 fix_fdomdocument() {
+    mkdir -p "$VENDOR/ver/SebastianBergmann/Version"
+    mv "$VENDOR/version/src/"* "$VENDOR/ver/SebastianBergmann/Version"
+    rm -rf "$VENDOR/version"
+
     mkdir -p "$VENDOR/fdomdocument/TheSeer/fDOMDocument"
     mv $VENDOR/fDOMDocument/src $VENDOR/fdomdocument/TheSeer/fDOMDocument/src
     mv $VENDOR/fDOMDocument/autoload.php $VENDOR/fdomdocument/TheSeer/fDOMDocument
