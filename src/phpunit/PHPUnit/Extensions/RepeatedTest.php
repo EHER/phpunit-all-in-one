@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  * @package    PHPUnit
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 2.0.0
@@ -47,7 +47,7 @@
  *
  * @package    PHPUnit
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
@@ -90,7 +90,7 @@ class PHPUnit_Extensions_RepeatedTest extends PHPUnit_Extensions_TestDecorator
      * @param  boolean                $processIsolation
      * @throws PHPUnit_Framework_Exception
      */
-    public function __construct(PHPUnit_Framework_Test $test, $timesRepeat = 1, $filter = FALSE, array $groups = array(), array $excludeGroups = array(), $processIsolation = FALSE)
+    public function __construct(PHPUnit_Framework_Test $test, $timesRepeat = 1, $processIsolation = FALSE)
     {
         parent::__construct($test);
 
@@ -103,9 +103,6 @@ class PHPUnit_Extensions_RepeatedTest extends PHPUnit_Extensions_TestDecorator
             );
         }
 
-        $this->filter           = $filter;
-        $this->groups           = $groups;
-        $this->excludeGroups    = $excludeGroups;
         $this->processIsolation = $processIsolation;
     }
 
@@ -138,16 +135,9 @@ class PHPUnit_Extensions_RepeatedTest extends PHPUnit_Extensions_TestDecorator
         for ($i = 0; $i < $this->timesRepeat && !$result->shouldStop(); $i++) {
             //@codingStandardsIgnoreEnd
             if ($this->test instanceof PHPUnit_Framework_TestSuite) {
-                $this->test->run(
-                  $result,
-                  $this->filter,
-                  $this->groups,
-                  $this->excludeGroups,
-                  $this->processIsolation
-                );
-            } else {
-                $this->test->run($result);
+                $this->test->setRunTestInSeparateProcess($this->processIsolation);
             }
+            $this->test->run($result);
         }
 
         return $result;

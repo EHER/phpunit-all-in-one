@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  * @package    PHPUnit
  * @subpackage Framework
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.5.0
@@ -669,7 +669,7 @@ function assertInternalType($expected, $actual, $message = '')
  */
 function assertJsonStringEqualsJsonString($expectedJson, $actualJson, $message = '')
 {
-    return PHPUnit_Framework_Assert::assertJsonStringEqualsJsonString($expectedJson, $actualJson, $message = '');
+    return PHPUnit_Framework_Assert::assertJsonStringEqualsJsonString($expectedJson, $actualJson, $message);
 }
 
 /**
@@ -682,7 +682,7 @@ function assertJsonStringEqualsJsonString($expectedJson, $actualJson, $message =
  */
 function assertJsonStringNotEqualsJsonString($expectedJson, $actualJson, $message = '')
 {
-    return PHPUnit_Framework_Assert::assertJsonStringNotEqualsJsonString($expectedJson, $actualJson, $message = '');
+    return PHPUnit_Framework_Assert::assertJsonStringNotEqualsJsonString($expectedJson, $actualJson, $message);
 }
 
 /**
@@ -695,7 +695,7 @@ function assertJsonStringNotEqualsJsonString($expectedJson, $actualJson, $messag
  */
 function assertJsonStringEqualsJsonFile($expectedFile, $actualJson, $message = '')
 {
-    return PHPUnit_Framework_Assert::assertJsonStringEqualsJsonFile($expectedFile, $actualJson, $message = '');
+    return PHPUnit_Framework_Assert::assertJsonStringEqualsJsonFile($expectedFile, $actualJson, $message);
 }
 
 /**
@@ -708,7 +708,7 @@ function assertJsonStringEqualsJsonFile($expectedFile, $actualJson, $message = '
  */
 function assertJsonStringNotEqualsJsonFile($expectedFile, $actualJson, $message = '')
 {
-    return PHPUnit_Framework_Assert::assertJsonStringNotEqualsJsonFile($expectedFile, $actualJson, $message = '');
+    return PHPUnit_Framework_Assert::assertJsonStringNotEqualsJsonFile($expectedFile, $actualJson, $message);
 }
 
 /**
@@ -721,7 +721,7 @@ function assertJsonStringNotEqualsJsonFile($expectedFile, $actualJson, $message 
  */
 function assertJsonFileNotEqualsJsonFile($expectedFile, $actualFile, $message = '')
 {
-    return PHPUnit_Framework_Assert::assertJsonFileNotEqualsJsonFile($expectedFile, $actualFile, $message = '');
+    return PHPUnit_Framework_Assert::assertJsonFileNotEqualsJsonFile($expectedFile, $actualFile, $message);
 }
 
 /**
@@ -734,7 +734,7 @@ function assertJsonFileNotEqualsJsonFile($expectedFile, $actualFile, $message = 
  */
 function assertJsonFileEqualsJsonFile($expectedFile, $actualFile, $message = '')
 {
-    return PHPUnit_Framework_Assert::assertJsonFileEqualsJsonFile($expectedFile, $actualFile, $message = '');
+    return PHPUnit_Framework_Assert::assertJsonFileEqualsJsonFile($expectedFile, $actualFile, $message);
 }
 
 /**
@@ -1699,11 +1699,12 @@ function isTrue()
 /**
  * Returns a PHPUnit_Framework_Constraint_Callback matcher object.
  *
+ * @param callable $callback
  * @return PHPUnit_Framework_Constraint_Callback
  */
-function callback()
+function callback($callback)
 {
-    return PHPUnit_Framework_Assert::callback();
+    return PHPUnit_Framework_Assert::callback($callback);
 }
 
 /**

@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  * @package    PHPUnit
  * @subpackage Runner
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 2.0.0
@@ -49,15 +49,14 @@
  * @package    PHPUnit
  * @subpackage Runner
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
  */
 class PHPUnit_Runner_Version
 {
-    const VERSION = '3.8';
-    protected static $version;
+    private static $version;
 
     /**
      * Returns the current version of PHPUnit.
@@ -67,24 +66,8 @@ class PHPUnit_Runner_Version
     public static function id()
     {
         if (self::$version === NULL) {
-            self::$version = self::VERSION;
-
-            if (is_dir(dirname(dirname(__DIR__)) . '/.git')) {
-                $dir = getcwd();
-                chdir(__DIR__);
-                $version = exec('git describe --tags');
-                chdir($dir);
-
-                if ($version) {
-                    if (count(explode('.', self::VERSION)) == 3) {
-                        self::$version = $version;
-                    } else {
-                        $version = explode('-', $version);
-
-                        self::$version = self::VERSION . '-' . $version[2];
-                    }
-                }
-            }
+            $version = new SebastianBergmann\Version('3.8', __DIR__);
+            self::$version = $version->getVersion();
         }
 
         return self::$version;

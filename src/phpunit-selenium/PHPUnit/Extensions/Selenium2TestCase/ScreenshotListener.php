@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2010-2011, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2010-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  * @package    PHPUnit_Selenium
  * @author     Giorgio Sironi <info@giorgiosironi.com>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 1.2.8
@@ -46,10 +46,10 @@
  * Base class for implementing commands with special semantics.
  *
  * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Giorgio Sironi <info@giorgiosironi.com>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.9
+ * @version    Release: 1.2.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.8
  */
@@ -76,8 +76,15 @@ class PHPUnit_Extensions_Selenium2TestCase_ScreenshotListener implements PHPUnit
     {
         if ($test instanceof PHPUnit_Extensions_Selenium2TestCase)
         {
-            $file = $this->directory . '/' . get_class($test) . '__' . $test->getName() . '__ ' . date('Y-m-d\TH-i-s') . '.png';
-            file_put_contents($file,        $test->currentScreenshot());
+            try {
+                $file = $this->directory . '/' . get_class($test) . '__' . $test->getName() . '__ ' . date('Y-m-d\TH-i-s') . '.png';
+                file_put_contents($file,        $test->currentScreenshot());
+            } catch (Exception $e) {
+                $file = $this->directory . '/' . get_class($test) . '__' . $test->getName() . '__ ' . date('Y-m-d\TH-i-s') . '.txt';
+                file_put_contents($file, "Screenshot generation doesn't work." . "\n"
+                                         . $e->getMessage() . "\n" 
+                                         . $e->getTraceAsString());
+            }
         }
     }
  

@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  * @package    PHPUnit
  * @subpackage Extensions_PhptTestCase
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.1.4
@@ -55,7 +55,7 @@ if (stream_resolve_include_path('PEAR/RunTest.php')) {
  * @package    PHPUnit
  * @subpackage Extensions_PhptTestCase
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.1.4
@@ -160,10 +160,12 @@ class PHPUnit_Extensions_PhptTestCase implements PHPUnit_Framework_Test, PHPUnit
 
         $result->startTest($this);
 
-        PHP_Timer::start();
+        $timer = new PHP_Timer;
+        $timer->start();
 
+        $runner->_php = PHP_BINARY;
         $buffer = $runner->run($this->filename, $options);
-        $time   = PHP_Timer::stop();
+        $time   = $timer->stop();
 
         error_reporting($currentErrorReporting);
 

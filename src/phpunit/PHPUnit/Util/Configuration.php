@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  * @package    PHPUnit
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.2.0
@@ -168,7 +168,7 @@
  * @package    PHPUnit
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
@@ -437,6 +437,12 @@ class PHPUnit_Util_Configuration
                 if ($log->hasAttribute('showUncoveredFiles')) {
                     $result['coverageTextShowUncoveredFiles'] = $this->getBoolean(
                       (string)$log->getAttribute('showUncoveredFiles'),
+                      FALSE
+                    );
+                }
+                if ($log->hasAttribute('showOnlySummary')) {
+                    $result['coverageTextShowOnlySummary'] = $this->getBoolean(
+                      (string)$log->getAttribute('showOnlySummary'),
                       FALSE
                     );
                 }
@@ -816,7 +822,7 @@ class PHPUnit_Util_Configuration
             if ($testSuiteFilter && $directoryNode->parentNode->getAttribute('name') != $testSuiteFilter) {
                 continue;
             }
-            
+
             $directory = (string)$directoryNode->nodeValue;
 
             if (empty($directory)) {
@@ -864,7 +870,7 @@ class PHPUnit_Util_Configuration
             if ($testSuiteFilter && $fileNode->parentNode->getAttribute('name') != $testSuiteFilter) {
                 continue;
             }
-            
+
             $file = (string)$fileNode->nodeValue;
 
             if (empty($file)) {

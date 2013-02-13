@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2010-2011, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2010-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Giorgio Sironi <info@giorgiosironi.com>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 1.2.0
@@ -46,10 +46,10 @@
  * Driver for creating browser session with Selenium 2 (WebDriver API).
  *
  * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Giorgio Sironi <info@giorgiosironi.com>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.9
+ * @version    Release: 1.2.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.0
  */
@@ -80,7 +80,7 @@ class PHPUnit_Extensions_Selenium2TestCase_Driver
         return new PHPUnit_Extensions_Selenium2TestCase_Session(
             $this,
             $sessionPrefix,
-            $browserUrl, 
+            $browserUrl,
             $timeouts
         );
     }
@@ -110,6 +110,8 @@ class PHPUnit_Extensions_Selenium2TestCase_Driver
             curl_setopt($curl, CURLOPT_POST, TRUE);
             if ($params && is_array($params)) {
                 curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($params));
+            } else {
+                curl_setopt($curl, CURLOPT_POSTFIELDS, '');
             }
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, TRUE);
         } else if ($http_method == 'DELETE') {
@@ -117,7 +119,16 @@ class PHPUnit_Extensions_Selenium2TestCase_Driver
         }
 
         $rawResponse = trim(curl_exec($curl));
+        if (curl_errno($curl)) {
+            throw new PHPUnit_Extensions_Selenium2TestCase_NoSeleniumException(
+                'Error connection[' . curl_errno($curl) .'] to ' .
+                $url->getValue()  . ': ' . curl_error($curl)
+            );
+        }
         $info = curl_getinfo($curl);
+        if ($info['http_code'] == 0) {
+            throw new PHPUnit_Extensions_Selenium2TestCase_NoSeleniumException();
+        }
         if ($info['http_code'] == 404) {
             throw new BadMethodCallException("The command $url is not recognized by the server.");
         }
@@ -129,7 +140,7 @@ class PHPUnit_Extensions_Selenium2TestCase_Driver
             } else {
                 $message = "Internal server error while executing $http_method request at $url. Response: " . var_export($content, TRUE);
             }
-            throw new RuntimeException($message);
+            throw new PHPUnit_Extensions_Selenium2TestCase_WebDriverException($message, isset($content['status']) ? $content['status'] : 0);
         }
         return new PHPUnit_Extensions_Selenium2TestCase_Response($content, $info);
     }

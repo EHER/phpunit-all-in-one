@@ -2,7 +2,7 @@
 /**
  * PHP_CodeCoverage
  *
- * Copyright (c) 2009-2012, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2009-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2010 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2010 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.1.0
@@ -46,6 +46,7 @@
 require_once 'File/Iterator/Autoload.php';
 require_once 'PHP/Token/Stream/Autoload.php';
 require_once 'Text/Template/Autoload.php';
+require_once 'SebastianBergmann/Version/autoload.php';
 
 spl_autoload_register(
   function ($class)
@@ -59,6 +60,8 @@ spl_autoload_register(
             'php_codecoverage_driver' => '/CodeCoverage/Driver.php',
             'php_codecoverage_driver_xdebug' => '/CodeCoverage/Driver/Xdebug.php',
             'php_codecoverage_exception' => '/CodeCoverage/Exception.php',
+            'php_codecoverage_exception_invalidcoverstarget' => '/CodeCoverage/Exception/InvalidCoversTarget.php',
+            'php_codecoverage_exception_unintentionallycoveredcode' => '/CodeCoverage/Exception/UnintentionallyCoveredCode.php',
             'php_codecoverage_filter' => '/CodeCoverage/Filter.php',
             'php_codecoverage_report_clover' => '/CodeCoverage/Report/Clover.php',
             'php_codecoverage_report_factory' => '/CodeCoverage/Report/Factory.php',
@@ -74,8 +77,7 @@ spl_autoload_register(
             'php_codecoverage_report_php' => '/CodeCoverage/Report/PHP.php',
             'php_codecoverage_report_text' => '/CodeCoverage/Report/Text.php',
             'php_codecoverage_util' => '/CodeCoverage/Util.php',
-            'php_codecoverage_util_invalidargumenthelper' => '/CodeCoverage/Util/InvalidArgumentHelper.php',
-            'php_codecoverage_version' => '/CodeCoverage/Version.php'
+            'php_codecoverage_util_invalidargumenthelper' => '/CodeCoverage/Util/InvalidArgumentHelper.php'
           );
 
           $path = dirname(dirname(__FILE__));

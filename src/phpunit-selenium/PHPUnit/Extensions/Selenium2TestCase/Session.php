@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2010-2011, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2010-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Giorgio Sironi <info@giorgiosironi.com>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 1.2.0
@@ -46,16 +46,17 @@
  * Browser session for Selenium 2: main point of entry for functionality.
  *
  * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Giorgio Sironi <info@giorgiosironi.com>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.9
+ * @version    Release: 1.2.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.0
  * @method void acceptAlert() Press OK on an alert, or confirms a dialog
  * @method mixed alertText($value = NULL) Gets the alert dialog text, or sets the text for a prompt dialog
  * @method void back()
  * @method void dismissAlert() Press Cancel on an alert, or does not confirm a dialog
+ * @method void doubleclick() Double-clicks at the current mouse coordinates (set by moveto).
  * @method string execute(array $javaScriptCode) Injects arbitrary JavaScript in the page and returns the last. See unit tests for usage
  * @method string executeAsync(array $javaScriptCode) Injects arbitrary JavaScript and wait for the callback (last element of arguments) to be called. See unit tests for usage
  * @method void forward()
@@ -113,9 +114,11 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
             'acceptAlert' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_AcceptAlert',
             'alertText' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_AlertText',
             'back' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
+            'click' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Click',
             'buttondown' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
             'buttonup' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
             'dismissAlert' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_DismissAlert',
+            'doubleclick' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
             'execute' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
             'executeAsync' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
             'forward' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
@@ -132,37 +135,21 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
             'window' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Window',
             'windowHandle' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_GenericAccessor',
             'windowHandles' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_GenericAccessor',
-            'touchDown' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
-            'touchUp' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
-            'touchMove' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
-            'touchScroll' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
-            'flick' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
+            'touchDown' => $this->touchCommandFactoryMethod('touch/down'),
+            'touchUp' => $this->touchCommandFactoryMethod('touch/up'),
+            'touchMove' => $this->touchCommandFactoryMethod('touch/move'),
+            'touchScroll' => $this->touchCommandFactoryMethod('touch/scroll'),
+            'flick' => $this->touchCommandFactoryMethod('touch/flick'),
             'location' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Location',
             'orientation' => 'PHPUnit_Extensions_Selenium2TestCase_SessionCommand_Orientation'
         );
     }
 
-
-    protected function initCommandsMap()
+    private function touchCommandFactoryMethod($urlSegment)
     {
-        $this->commandsMap = array(
-            'touchDown' => 'touch/down',
-            'touchUp' => 'touch/up',
-            'touchMove' => 'touch/move',
-            'touchScroll' => 'touch/scroll',
-            'flick' => 'touch/flick'
-        );
-    }
-
-    /**
-     * @params string $commandClass     a class name, descending from
-                                        PHPUnit_Extensions_Selenium2TestCase_Command
-     * @return callable
-     */
-    private function factoryMethod($commandClass)
-    {
-        return function($jsonParameters, $url) use ($commandClass) {
-            return new $commandClass($jsonParameters, $url);
+        $url = $this->url->addCommand($urlSegment);
+        return function ($jsonParameters, $commandUrl) use ($url) {
+            return new PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost($jsonParameters, $url);
         };
     }
 
@@ -188,8 +175,16 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
         if ($this->stopped) {
             return;
         }
-        $this->driver->curl('DELETE', $this->url);
+        try {
+            $this->driver->curl('DELETE', $this->url);
+        } catch (Exception $e) {
+            // sessions which aren't closed because of sharing can time out on the server. In no way trying to close them should make a test fail, as it already finished before arriving here.
+            "Closing sessions: " . $e->getMessage() . "\n";
+        }
         $this->stopped = TRUE;
+        if ($this->stopped) {
+            return;
+        }
     }
 
     /**
@@ -247,6 +242,15 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
     }
 
     /**
+     * @param string $value     e.g. 'body'
+     * @return PHPUnit_Extensions_Selenium2TestCase_Element
+     */
+    public function byTag($value)
+    {
+        return $this->by('tag name', $value);
+    }
+
+    /**
      * @param string $strategy     supported by JsonWireProtocol element/ command
      * @param string $value
      * @return PHPUnit_Extensions_Selenium2TestCase_Element
@@ -271,9 +275,18 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
     public function element(PHPUnit_Extensions_Selenium2TestCase_ElementCriteria $criteria)
     {
         $value = $this->postCommand('element', $criteria);
+        return $this->elementFromResponseValue($value);
+    }
+
+    /**
+     * @param array $value A selenium WebElement
+     * @return PHPUnit_Extensions_Selenium2TestCase_Element
+     */
+    public function elementFromResponseValue(array $value)
+    {
         return PHPUnit_Extensions_Selenium2TestCase_Element::fromResponseValue($value,
-                                                                               $this->url->descend('element'),
-                                                                               $this->driver);
+            $this->url->descend('element'),
+            $this->driver);
     }
 
     /**
@@ -284,7 +297,7 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
         $values = $this->postCommand('elements', $criteria);
         $elements = array();
         foreach ($values as $value) {
-            $elements[] = PHPUnit_Extensions_Selenium2TestCase_Element::fromResponseValue($value, $this->url->descend('element'), $this->driver);
+            $elements[] = $this->elementFromResponseValue($value);
         }
         return $elements;
     }
@@ -328,7 +341,7 @@ class PHPUnit_Extensions_Selenium2TestCase_Session
      */
     public function currentWindow()
     {
-        $url = $this->url->descend('window')->descend($this->windowHandle());
+        $url = $this->url->descend('window')->descend(trim($this->windowHandle(), '{}'));
         return new PHPUnit_Extensions_Selenium2TestCase_Window($this->driver, $url);
     }
 

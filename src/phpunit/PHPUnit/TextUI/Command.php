@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  * @package    PHPUnit
  * @subpackage TextUI
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.0.0
@@ -50,7 +50,7 @@
  * @package    PHPUnit
  * @subpackage TextUI
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
@@ -308,6 +308,7 @@ class PHPUnit_TextUI_Command
 
                             $this->arguments['coverageText'] = $option[1];
                             $this->arguments['coverageTextShowUncoveredFiles'] = FALSE;
+                            $this->arguments['coverageTextShowOnlySummary'] = FALSE;
                         }
                         break;
                     }
@@ -414,10 +415,7 @@ class PHPUnit_TextUI_Command
                 break;
 
                 case '--stderr': {
-                    $this->arguments['printer'] = new PHPUnit_TextUI_ResultPrinter(
-                      'php://stderr',
-                      isset($this->arguments['verbose']) ? $this->arguments['verbose'] : FALSE
-                    );
+                    $this->arguments['stderr'] = TRUE;
                 }
                 break;
 
@@ -511,6 +509,15 @@ class PHPUnit_TextUI_Command
             }
         }
 
+        if (isset($this->arguments['stderr'])) {
+            $this->arguments['printer'] = new PHPUnit_TextUI_ResultPrinter(
+              'php://stderr',
+              isset($this->arguments['verbose']) ?: FALSE,
+              isset($this->arguments['colors']) ?: FALSE,
+              isset($this->arguments['debug']) ?: FALSE
+            );
+        }
+
         $this->handleCustomTestSuite();
 
         if (!isset($this->arguments['test'])) {
@@ -520,7 +527,7 @@ class PHPUnit_TextUI_Command
             }
 
             if (isset($this->options[1][1])) {
-                $this->arguments['testFile'] = $this->options[1][1];
+                $this->arguments['testFile'] = realpath($this->options[1][1]);
             } else {
                 $this->arguments['testFile'] = '';
             }

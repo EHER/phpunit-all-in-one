@@ -2,7 +2,7 @@
 /**
  * PHP_Timer
  *
- * Copyright (c) 2010-2012, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2010-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
  *
  * @package    PHP
  * @subpackage Timer
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2010-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-timer
  * @since      File available since Release 1.0.0
@@ -48,8 +48,8 @@
  *
  * @package    PHP
  * @subpackage Timer
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2010-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @version    Release: 1.0.4
  * @link       http://github.com/sebastianbergmann/php-timer
@@ -60,19 +60,33 @@ class PHP_Timer
     /**
      * @var array
      */
-    protected static $startTimes = array();
+    private $startTimes = array();
 
     /**
      * @var float
      */
-    public static $requestTime;
+    private $requestTime;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        if (isset($_SERVER['REQUEST_TIME_FLOAT'])) {
+            $this->requestTime = $_SERVER['REQUEST_TIME_FLOAT'];
+        }
+
+        else {
+            $this->requestTime = microtime(TRUE);
+        }
+    }
 
     /**
      * Starts the timer.
      */
-    public static function start()
+    public function start()
     {
-        array_push(self::$startTimes, microtime(TRUE));
+        array_push($this->startTimes, microtime(TRUE));
     }
 
     /**
@@ -80,9 +94,9 @@ class PHP_Timer
      *
      * @return float
      */
-    public static function stop()
+    public function stop()
     {
-        return microtime(TRUE) - array_pop(self::$startTimes);
+        return microtime(TRUE) - array_pop($this->startTimes);
     }
 
     /**
@@ -91,7 +105,7 @@ class PHP_Timer
      * @param  float $time
      * @return string
      */
-    public static function secondsToTimeString($time)
+    public function secondsToTimeString($time)
     {
         $buffer = '';
 
@@ -126,9 +140,9 @@ class PHP_Timer
      *
      * @return string
      */
-    public static function timeSinceStartOfRequest()
+    public function timeSinceStartOfRequest()
     {
-        return self::secondsToTimeString(time() - self::$requestTime);
+        return $this->secondsToTimeString(microtime(TRUE) - $this->requestTime);
     }
 
     /**
@@ -136,24 +150,12 @@ class PHP_Timer
      *
      * @return string
      */
-    public static function resourceUsage()
+    public function resourceUsage()
     {
         return sprintf(
           'Time: %s, Memory: %4.2fMb',
-          self::timeSinceStartOfRequest(),
+          $this->timeSinceStartOfRequest(),
           memory_get_peak_usage(TRUE) / 1048576
         );
     }
-}
-
-if (isset($_SERVER['REQUEST_TIME_FLOAT'])) {
-    PHP_Timer::$requestTime = $_SERVER['REQUEST_TIME_FLOAT'];
-}
-
-else if (isset($_SERVER['REQUEST_TIME'])) {
-    PHP_Timer::$requestTime = $_SERVER['REQUEST_TIME'];
-}
-
-else {
-    PHP_Timer::$requestTime = time();
 }

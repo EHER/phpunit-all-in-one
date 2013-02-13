@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@
  * @subpackage Framework_Constraint
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @author     Bernhard Schussek <bschussek@2bepublished.at>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.0.0
@@ -54,7 +54,7 @@
  * @subpackage Framework_Constraint
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
  * @author     Bernhard Schussek <bschussek@2bepublished.at>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
@@ -98,9 +98,9 @@ class PHPUnit_Framework_Constraint_IsInstanceOf extends PHPUnit_Framework_Constr
     protected function failureDescription($other)
     {
         return sprintf(
-          '%s is an instance of class "%s"',
-
+          '%s is an instance of %s "%s"',
           PHPUnit_Util_Type::shortenedExport($other),
+          $this->getType(),
           $this->className
         );
     }
@@ -113,9 +113,20 @@ class PHPUnit_Framework_Constraint_IsInstanceOf extends PHPUnit_Framework_Constr
     public function toString()
     {
         return sprintf(
-          'is instance of class "%s"',
-
+          'is instance of %s "%s"',
+          $this->getType(),
           $this->className
         );
+    }
+
+    private function getType() {
+        try {
+            $reflection = new ReflectionClass($this->className);
+            if ($reflection->isInterface()) {
+                return 'interface';
+            }
+        } catch (ReflectionException $e) {
+        }
+        return 'class';
     }
 }

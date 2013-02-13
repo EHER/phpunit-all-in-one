@@ -2,7 +2,7 @@
 /**
  * PHP_CodeCoverage
  *
- * Copyright (c) 2009-2012, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2009-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.1.0
@@ -48,8 +48,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.1.0
@@ -305,7 +305,6 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
     protected function renderSource(PHP_CodeCoverage_Report_Node_File $node)
     {
         $coverageData = $node->getCoverageData();
-        $ignoredLines = $node->getIgnoredLines();
         $testData     = $node->getTestData();
         $codeLines    = $this->loadFile($node->getPath());
         $lines        = '';
@@ -317,7 +316,7 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
             $popoverContent = '';
             $popoverTitle   = '';
 
-            if (!isset($ignoredLines[$i]) && isset($coverageData[$i])) {
+            if (isset($coverageData[$i])) {
                 $numTests = count($coverageData[$i]);
 
                 if ($coverageData[$i] === NULL) {
@@ -380,7 +379,7 @@ class PHP_CodeCoverage_Report_HTML_Renderer_File extends PHP_CodeCoverage_Report
 
             if (!empty($popoverTitle)) {
                 $popover = sprintf(
-                  ' data-title="%s" data-content="%s" data-placement="bottom"',
+                  ' data-title="%s" data-content="%s" data-placement="bottom" data-html="true"',
                   $popoverTitle,
                   htmlspecialchars($popoverContent)
                 );

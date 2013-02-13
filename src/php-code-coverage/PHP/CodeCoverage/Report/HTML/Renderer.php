@@ -2,7 +2,7 @@
 /**
  * PHP_CodeCoverage
  *
- * Copyright (c) 2009-2012, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2009-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.1.0
@@ -48,8 +48,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.1.0
@@ -87,6 +87,11 @@ abstract class PHP_CodeCoverage_Report_HTML_Renderer
     protected $highLowerBound;
 
     /**
+     * @var string
+     */
+    protected $version;
+
+    /**
      * Constructor.
      *
      * @param string  $templatePath
@@ -98,12 +103,15 @@ abstract class PHP_CodeCoverage_Report_HTML_Renderer
      */
     public function __construct($templatePath, $charset, $generator, $date, $lowUpperBound, $highLowerBound)
     {
+        $version = new SebastianBergmann\Version('1.3', __DIR__);
+
         $this->templatePath   = $templatePath;
         $this->charset        = $charset;
         $this->generator      = $generator;
         $this->date           = $date;
         $this->lowUpperBound  = $lowUpperBound;
         $this->highLowerBound = $highLowerBound;
+        $this->version        = $version->getVersion();
     }
 
     /**
@@ -194,7 +202,7 @@ abstract class PHP_CodeCoverage_Report_HTML_Renderer
             'breadcrumbs'      => $this->getBreadcrumbs($node),
             'charset'          => $this->charset,
             'date'             => $this->date,
-            'version'          => PHP_CodeCoverage_Version::id(),
+            'version'          => $this->version,
             'php_version'      => PHP_VERSION,
             'generator'        => $this->generator,
             'low_upper_bound'  => $this->lowUpperBound,
@@ -211,27 +219,42 @@ abstract class PHP_CodeCoverage_Report_HTML_Renderer
 
         foreach ($path as $step) {
             if ($step !== $node) {
-                $breadcrumbs .= sprintf(
-                  '        <li><a href="%s.html">%s</a> <span class="divider">/</span></li>' . "\n",
-                  $step->getId(),
-                  $step->getName()
-                );
+                $breadcrumbs .= $this->getInactiveBreadcrumb($step);
             } else {
-                $breadcrumbs .= sprintf(
-                  '        <li class="active">%s</li>' . "\n",
-                  $step->getName()
+                $breadcrumbs .= $this->getActiveBreadcrumb(
+                  $step,
+                  $node instanceof PHP_CodeCoverage_Report_Node_Directory
                 );
-
-                if ($node instanceof PHP_CodeCoverage_Report_Node_Directory) {
-                    $breadcrumbs .= sprintf(
-                      '        <li>(<a href="%s.dashboard.html">Dashboard</a>)</li>' . "\n",
-                      $step->getId()
-                    );
-                }
             }
         }
 
         return $breadcrumbs;
+    }
+
+    protected function getActiveBreadcrumb(PHP_CodeCoverage_Report_Node $node, $isDirectory)
+    {
+        $buffer = sprintf(
+          '        <li class="active">%s</li>' . "\n",
+          $node->getName()
+        );
+
+        if ($isDirectory) {
+            $buffer .= sprintf(
+              '        <li>(<a href="%s.dashboard.html">Dashboard</a>)</li>' . "\n",
+              $node->getId()
+            );
+        }
+
+        return $buffer;
+    }
+
+    protected function getInactiveBreadcrumb(PHP_CodeCoverage_Report_Node $node)
+    {
+        return sprintf(
+          '        <li><a href="%s.html">%s</a> <span class="divider">/</span></li>' . "\n",
+          $node->getId(),
+          $node->getName()
+        );
     }
 
     protected function getCoverageBar($percent)

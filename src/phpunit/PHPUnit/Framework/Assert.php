@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  * @package    PHPUnit
  * @subpackage Framework
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 2.0.0
@@ -49,7 +49,7 @@
  * @package    PHPUnit
  * @subpackage Framework
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
@@ -78,7 +78,7 @@ abstract class PHPUnit_Framework_Assert
         }
         if (!(is_array($array) || $array instanceof ArrayAccess)) {
             throw PHPUnit_Util_InvalidArgumentHelper::factory(
-              1, 'array or ArrayAccess'
+              2, 'array or ArrayAccess'
             );
         }
 
@@ -104,7 +104,7 @@ abstract class PHPUnit_Framework_Assert
         }
         if (!(is_array($array) || $array instanceof ArrayAccess)) {
             throw PHPUnit_Util_InvalidArgumentHelper::factory(
-              1, 'array or ArrayAccess'
+              2, 'array or ArrayAccess'
             );
         }
 
@@ -2376,6 +2376,7 @@ abstract class PHPUnit_Framework_Assert
     /**
      * Returns a PHPUnit_Framework_Constraint_Callback matcher object.
      *
+     * @param callable $callback
      * @return PHPUnit_Framework_Constraint_Callback
      */
     public static function callback($callback)
@@ -2765,14 +2766,14 @@ abstract class PHPUnit_Framework_Assert
                 );
             }
 
-            return PHPUnit_Util_Class::getStaticAttribute(
+            return self::getStaticAttribute(
               $classOrObject,
               $attributeName
             );
         }
 
         else if (is_object($classOrObject)) {
-            return PHPUnit_Util_Class::getObjectAttribute(
+            return self::getObjectAttribute(
               $classOrObject,
               $attributeName
             );
@@ -2828,5 +2829,108 @@ abstract class PHPUnit_Framework_Assert
     public static function resetCount()
     {
         self::$count = 0;
+    }
+
+    /**
+     * Returns the value of a static attribute.
+     * This also works for attributes that are declared protected or private.
+     *
+     * @param  string $className
+     * @param  string $attributeName
+     * @return mixed
+     * @throws PHPUnit_Framework_Exception
+     * @since  Method available since Release 3.8.0
+     */
+    protected static function getStaticAttribute($className, $attributeName)
+    {
+        if (!is_string($className)) {
+            throw PHPUnit_Util_InvalidArgumentHelper::factory(1, 'string');
+        }
+
+        if (!class_exists($className)) {
+            throw PHPUnit_Util_InvalidArgumentHelper::factory(1, 'class name');
+        }
+
+        if (!is_string($attributeName)) {
+            throw PHPUnit_Util_InvalidArgumentHelper::factory(2, 'string');
+        }
+
+        $class = new ReflectionClass($className);
+
+        while ($class) {
+            $attributes = $class->getStaticProperties();
+
+            if (array_key_exists($attributeName, $attributes)) {
+                return $attributes[$attributeName];
+            }
+
+            $class = $class->getParentClass();
+        }
+
+        throw new PHPUnit_Framework_Exception(
+          sprintf(
+            'Attribute "%s" not found in class.',
+
+            $attributeName
+          )
+        );
+    }
+
+    /**
+     * Returns the value of an object's attribute.
+     * This also works for attributes that are declared protected or private.
+     *
+     * @param  object $object
+     * @param  string $attributeName
+     * @return mixed
+     * @throws PHPUnit_Framework_Exception
+     * @since  Method available since Release 3.8.0
+     */
+    protected static function getObjectAttribute($object, $attributeName)
+    {
+        if (!is_object($object)) {
+            throw PHPUnit_Util_InvalidArgumentHelper::factory(1, 'object');
+        }
+
+        if (!is_string($attributeName)) {
+            throw PHPUnit_Util_InvalidArgumentHelper::factory(2, 'string');
+        }
+
+        try {
+            $attribute = new ReflectionProperty($object, $attributeName);
+        }
+
+        catch (ReflectionException $e) {
+            $reflector = new ReflectionObject($object);
+
+            while ($reflector = $reflector->getParentClass()) {
+                try {
+                    $attribute = $reflector->getProperty($attributeName);
+                    break;
+                }
+
+                catch(ReflectionException $e) {
+                }
+            }
+        }
+
+        if (isset($attribute)) {
+            if (!$attribute || $attribute->isPublic()) {
+                return $object->$attributeName;
+            }
+
+            $attribute->setAccessible(TRUE);
+            $value = $attribute->getValue($object);
+            $attribute->setAccessible(FALSE);
+
+            return $value;
+        }
+
+        throw new PHPUnit_Framework_Exception(
+          sprintf(
+            'Attribute "%s" not found in object.',
+            $attributeName
+          )
+        );
     }
 }

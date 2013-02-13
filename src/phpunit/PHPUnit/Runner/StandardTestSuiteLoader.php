@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  * @package    PHPUnit
  * @subpackage Runner
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 2.0.0
@@ -49,7 +49,7 @@
  * @package    PHPUnit
  * @subpackage Runner
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 2.0.0
@@ -73,9 +73,13 @@ class PHPUnit_Runner_StandardTestSuiteLoader implements PHPUnit_Runner_TestSuite
         }
 
         if (!class_exists($suiteClassName, FALSE)) {
-            PHPUnit_Util_Class::collectStart();
+            $loadedClasses = get_declared_classes();
+
             $filename = PHPUnit_Util_Fileloader::checkAndLoad($suiteClassFile);
-            $loadedClasses = PHPUnit_Util_Class::collectEnd();
+
+            $loadedClasses = array_values(
+              array_diff(get_declared_classes(), $loadedClasses)
+            );
         }
 
         if (!class_exists($suiteClassName, FALSE) && !empty($loadedClasses)) {

@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2010-2011, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2010-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Giorgio Sironi <info@giorgiosironi.com>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 1.2.0
@@ -46,10 +46,10 @@
  * Object representing a DOM element.
  *
  * @package    PHPUnit_Selenium
- * @author     Giorgio Sironi <giorgio.sironi@asp-poli.it>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Giorgio Sironi <info@giorgiosironi.com>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.9
+ * @version    Release: 1.2.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.0
  * @method string attribute($name) Retrieves an element's attribute
@@ -64,7 +64,7 @@
  * @method bool selected() Checks the state of an option or other form element
  * @method array size() Retrieves the dimensions of the element: 'width' and 'height' of the returned array
  * @method void submit() Submits a form; can be called on its children
- * @method string value($newValue = NULL) Get or set value of form elements
+ * @method string value($newValue = NULL) Get or set value of form elements. If the element already has a value, the set one will be appended to it.
  * @method string text() Get content of ordinary elements
  */
 class PHPUnit_Extensions_Selenium2TestCase_Element
@@ -98,23 +98,31 @@ class PHPUnit_Extensions_Selenium2TestCase_Element
             'submit' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
             'text' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericAccessor',
             'value' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_Value',
-            'tap' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
-            'scroll' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
-            'doubletap' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
-            'longtap' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost',
-            'flick' => 'PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost'
+            'tap' => $this->touchCommandFactoryMethod('touch/click'),
+            'scroll' => $this->touchCommandFactoryMethod('touch/scroll'),
+            'doubletap' => $this->touchCommandFactoryMethod('touch/doubleclick'),
+            'longtap' => $this->touchCommandFactoryMethod('touch/longclick'),
+            'flick' => $this->touchCommandFactoryMethod('touch/flick')
         );
     }
 
-    protected function initCommandsMap()
+    private function touchCommandFactoryMethod($urlSegment)
     {
-        $this->commandsMap = array(
-            'tap' => 'touch/click',
-            'scroll' => 'touch/scroll',
-            'doubletap' => 'touch/doubleclick',
-            'longtap' => 'touch/longclick',
-            'flick' => 'touch/flick'
-        );
+        $url = $this->sessionUrl()->addCommand($urlSegment);
+        $self = $this;
+        return function ($jsonParameters, $commandUrl) use ($url, $self) {
+            if ((is_array($jsonParameters) &&
+                    !isset($jsonParameters['element'])) ||
+                    is_null($jsonParameters)) {
+                $jsonParameters['element'] = $self->getId();
+            }
+            return new PHPUnit_Extensions_Selenium2TestCase_ElementCommand_GenericPost($jsonParameters, $url);
+        };
+    }
+
+    private function sessionUrl()
+    {
+        return $this->url->ascend()->ascend();
     }
 
     /**
@@ -154,28 +162,5 @@ class PHPUnit_Extensions_Selenium2TestCase_Element
     protected function criteria($using)
     {
         return new PHPUnit_Extensions_Selenium2TestCase_ElementCriteria($using);
-    }
-
-    protected function newCommand($commandName, $jsonParameters)
-    {
-        if (isset($this->commands[$commandName])) {
-            $factoryMethod = $this->commands[$commandName];
-            $realCommandName = $commandName;
-            if (isset($this->commandsMap[$commandName]))
-                $realCommandName = $this->commandsMap[$commandName];
-            if (strpos($realCommandName, 'touch') !== false) {
-                $url = $this->url->ascend()->ascend()->addCommand($realCommandName);
-                if ((is_array($jsonParameters) &&
-                        !isset($jsonParameters['element'])) ||
-                        is_null($jsonParameters)) {
-                    $jsonParameters['element'] = $this->getId();
-                }
-            } else {
-                $url = $this->url->addCommand($realCommandName);
-            }
-            $command = $factoryMethod($jsonParameters, $url);
-            return $command;
-        }
-        throw new BadMethodCallException("The command '$commandName' is not existent or not supported yet.");
     }
 }

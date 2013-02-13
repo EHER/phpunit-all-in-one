@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  * @package    PHPUnit
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.0.0
@@ -49,7 +49,7 @@
  * @package    PHPUnit
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.0.0
@@ -105,13 +105,15 @@ class PHPUnit_Util_Type
      *
      * @param  mixed $value The value to export
      * @param  integer $indentation The indentation level of the 2nd+ line
-     * @param  array $processedObjects Contains all objects that were already
-     *                                 rendered
+     * @param  PHPUnit_Util_Type_ExportContext $processed Contains all objects
+     *                                                    and arrays that have
+     *                                                    previously been
+     *                                                    rendered
      * @return string
      * @since  Method available since Release 3.6.0
      * @see    PHPUnit_Util_Type::export
      */
-    protected static function recursiveExport($value, $indentation, &$processedObjects = array())
+    protected static function recursiveExport(&$value, $indentation, $processed = null)
     {
         if ($value === NULL) {
             return 'null';
@@ -125,6 +127,18 @@ class PHPUnit_Util_Type
             return 'false';
         }
 
+        if (is_float($value) && floatval(intval($value)) === $value) {
+            return "$value.0";
+        }
+
+        if (is_resource($value)) {
+            return sprintf(
+              'resource(%d) of type (%s)',
+              $value,
+              get_resource_type($value)
+            );
+        }
+
         if (is_string($value)) {
             // Match for most non printable chars somewhat taking multibyte chars into account
             if (preg_match('/[^\x09-\x0d\x20-\xff]/', $value)) {
@@ -136,71 +150,57 @@ class PHPUnit_Util_Type
                    "'";
         }
 
-        $origValue = $value;
+        $whitespace = str_repeat(' ', 4 * $indentation);
 
-        if (is_object($value)) {
-            if (in_array($value, $processedObjects, TRUE)) {
-                return sprintf(
-                  '%s Object (*RECURSION*)',
-
-                  get_class($value)
-                );
-            }
-
-            $processedObjects[] = $value;
-
-            // Convert object to array
-            $value = self::toArray($value);
+        if (!$processed) {
+            $processed = new PHPUnit_Util_Type_ExportContext;
         }
 
         if (is_array($value)) {
-            $whitespace = str_repeat('    ', $indentation);
-
-            // There seems to be no other way to check arrays for recursion
-            // http://www.php.net/manual/en/language.types.array.php#73936
-            preg_match_all('/\n            \[(\w+)\] => Array\s+\*RECURSION\*/', print_r($value, TRUE), $matches);
-            $recursiveKeys = array_unique($matches[1]);
-
-            // Convert to valid array keys
-            // Numeric integer strings are automatically converted to integers
-            // by PHP
-            foreach ($recursiveKeys as $key => $recursiveKey) {
-                if ((string)(integer)$recursiveKey === $recursiveKey) {
-                    $recursiveKeys[$key] = (integer)$recursiveKey;
-                }
+            if (($key = $processed->contains($value)) !== false) {
+                return "Array &$key";
             }
 
-            $content = '';
+            $key = $processed->add($value);
+            if (count($value) > 0) {
+                $output = "Array &$key (\n";
 
-            foreach ($value as $key => $val) {
-                if (in_array($key, $recursiveKeys, TRUE)) {
-                    $val = 'Array (*RECURSION*)';
+                foreach ($value as $k => $v) {
+                    $ek = self::export($k);
+                    $output .= "$whitespace    $ek => ".self::recursiveExport($value[$k], $indentation + 1, $processed)."\n";
                 }
 
-                else {
-                    $val = self::recursiveExport($val, $indentation+1, $processedObjects);
-                }
-
-                $content .=  $whitespace . '    ' . self::export($key) . ' => ' . $val . "\n";
+                return "$output$whitespace)";
+            } else {
+                return "Array &$key ()";
             }
-
-            if (strlen($content) > 0) {
-                $content = "\n" . $content . $whitespace;
-            }
-
-            return sprintf(
-              "%s (%s)",
-
-              is_object($origValue) ? get_class($origValue) . ' Object' : 'Array',
-              $content
-            );
         }
 
-        if (is_double($value) && (double)(integer)$value === $value) {
-            return $value . '.0';
+        if (is_object($value)) {
+            $class = get_class($value);
+
+            if ($hash = $processed->contains($value)) {
+                return "$class Object &$hash";
+            }
+
+            $hash = $processed->add($value);
+            $array = self::toArray($value);
+            if (count($array) > 0) {
+                $output = "$class Object &$hash (\n";
+
+                foreach ($array as $k => $v) {
+                    $k = self::export($k);
+                    $output .= "$whitespace    $k => ".self::recursiveExport($v, $indentation + 1, $processed)."\n";
+                }
+
+                return "$output$whitespace)";
+            } else {
+                return "$class Object &$hash ()";
+            }
+
         }
 
-        return (string)$value;
+        return var_export($value, true);
     }
 
     /**
@@ -224,17 +224,17 @@ class PHPUnit_Util_Type
             return self::shortenedString($value);
         }
 
-        $origValue = $value;
-
-        if (is_object($value)) {
-            $value = self::toArray($value);
+        if(is_object($value)) {
+            return sprintf(
+              "%s Object (%s)",
+              get_class($value),
+              count(self::toArray($value)) > 0 ? '...' : ''
+            );
         }
 
         if (is_array($value)) {
             return sprintf(
-              "%s (%s)",
-
-              is_object($origValue) ? get_class($origValue) . ' Object' : 'Array',
+              "Array (%s)",
               count($value) > 0 ? '...' : ''
             );
         }
@@ -290,7 +290,7 @@ class PHPUnit_Util_Type
         // above (fast) mechanism nor with reflection
         // Format the output similarly to print_r() in this case
         if ($object instanceof SplObjectStorage) {
-            foreach ($object as $key => $value) {
+            foreach ($object as $value) {
                 $array[spl_object_hash($value)] = array(
                     'obj' => $value,
                     'inf' => $object->getInfo(),

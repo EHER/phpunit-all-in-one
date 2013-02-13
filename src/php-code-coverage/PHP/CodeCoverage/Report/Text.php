@@ -2,7 +2,7 @@
 /**
  * PHP_CodeCoverage
  *
- * Copyright (c) 2009-2012, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2009-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.1.0
@@ -50,8 +50,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.1.0
@@ -62,6 +62,7 @@ class PHP_CodeCoverage_Report_Text
     protected $lowUpperBound;
     protected $highLowerBound;
     protected $showUncoveredFiles;
+    protected $showOnlySummary;
 
     protected $colors = array(
       'green'  => "\x1b[30;42m",
@@ -72,18 +73,18 @@ class PHP_CodeCoverage_Report_Text
       'eol'    => "\x1b[2K",
     );
 
-    public function __construct(PHPUnit_Util_Printer $outputStream, $lowUpperBound, $highLowerBound, $showUncoveredFiles)
+    public function __construct(PHPUnit_Util_Printer $outputStream, $lowUpperBound, $highLowerBound, $showUncoveredFiles, $showOnlySummary)
     {
         $this->outputStream       = $outputStream;
         $this->lowUpperBound      = $lowUpperBound;
         $this->highLowerBound     = $highLowerBound;
         $this->showUncoveredFiles = $showUncoveredFiles;
+        $this->showOnlySummary    = $showOnlySummary;
     }
 
     /**
      * @param  PHP_CodeCoverage $coverage
-     * @param  string           $target
-     * @param  string           $name
+     * @param  bool             $showColors
      * @return string
      */
     public function process(PHP_CodeCoverage $coverage, $showColors = FALSE)
@@ -122,17 +123,26 @@ class PHP_CodeCoverage_Report_Text
         $output .= PHP_EOL . PHP_EOL .
                    $colors['header'] . 'Code Coverage Report ';
 
-        $output .= PHP_EOL .
-                   date('  Y-m-d H:i:s', $_SERVER['REQUEST_TIME']) .
-                   PHP_EOL;
+        if ($this->showOnlySummary) {
+            $output .= 'Summary: ' . PHP_EOL;
+        } else {
+            $output .= PHP_EOL .
+                       date('  Y-m-d H:i:s', $_SERVER['REQUEST_TIME']) .
+                       PHP_EOL . PHP_EOL .
+                       ' Summary: ';
+        }
 
-        $output .= PHP_EOL . ' Summary: ' . PHP_EOL . $colors['reset']
+        $output .= PHP_EOL . $colors['reset']
           . $colors['classes'] . $colors['eol'] . '  Classes: ' . PHP_CodeCoverage_Util::percent($report->getNumTestedClassesAndTraits(), $report->getNumClassesAndTraits(), TRUE)
           . ' (' . $report->getNumTestedClassesAndTraits() . '/' . $report->getNumClassesAndTraits() . ')' . PHP_EOL . $colors ['eol']
           . $colors['methods'] . $colors['eol'] . '  Methods: ' . PHP_CodeCoverage_Util::percent($report->getNumTestedMethods(), $report->getNumMethods(), TRUE)
           . ' (' . $report->getNumTestedMethods() . '/' . $report->getNumMethods() . ')' . PHP_EOL . $colors ['eol']
           . $colors['lines'] . $colors['eol'] . '  Lines:   ' . PHP_CodeCoverage_Util::percent($report->getNumExecutedLines(), $report->getNumExecutableLines(), TRUE)
           . ' (' . $report->getNumExecutedLines() . '/' . $report->getNumExecutableLines() . ')' . PHP_EOL . $colors['reset'] . $colors ['eol'];
+
+        if ($this->showOnlySummary) {
+            return $this->outputStream->write($output . PHP_EOL);
+        }
 
         $classCoverage = array();
 
@@ -141,10 +151,9 @@ class PHP_CodeCoverage_Report_Text
                 continue;
             }
 
-            $classes      = $item->getClassesAndTraits();
-            $coverage     = $item->getCoverageData();
-            $lines        = array();
-            $ignoredLines = $item->getIgnoredLines();
+            $classes  = $item->getClassesAndTraits();
+            $coverage = $item->getCoverageData();
+            $lines    = array();
 
             foreach ($classes as $className => $class) {
                 $classStatements        = 0;
@@ -159,10 +168,6 @@ class PHP_CodeCoverage_Report_Text
                     for ($i  = $method['startLine'];
                          $i <= $method['endLine'];
                          $i++) {
-                        if (isset($ignoredLines[$i])) {
-                            continue;
-                        }
-
                         $add   = TRUE;
                         $count = 0;
 

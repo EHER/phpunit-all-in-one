@@ -2,7 +2,7 @@
 /**
  * PHP_CodeCoverage
  *
- * Copyright (c) 2009-2012, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2009-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.0.0
@@ -48,8 +48,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.0.0
@@ -185,6 +185,7 @@ class PHP_CodeCoverage_Report_HTML
         copy($this->templatePath . 'js/bootstrap.min.js', $dir . 'bootstrap.min.js');
         copy($this->templatePath . 'js/highcharts.js', $dir . 'highcharts.js');
         copy($this->templatePath . 'js/jquery.min.js', $dir . 'jquery.min.js');
+        copy($this->templatePath . 'js/html5shiv.js', $dir . 'html5shiv.js');
 
         $dir = $this->getDirectory($target . 'img');
         copy($this->templatePath . 'img/glyphicons-halflings.png', $dir . 'glyphicons-halflings.png');
@@ -207,7 +208,7 @@ class PHP_CodeCoverage_Report_HTML
             return $directory;
         }
 
-        if (mkdir($directory, 0777, TRUE)) {
+        if (@mkdir($directory, 0777, TRUE)) {
             return $directory;
         }
 

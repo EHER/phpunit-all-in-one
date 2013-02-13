@@ -2,7 +2,7 @@
 /**
  * PHP_CodeCoverage
  *
- * Copyright (c) 2009-2012, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2009-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.1.0
@@ -48,8 +48,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.1.0
@@ -65,11 +65,6 @@ class PHP_CodeCoverage_Report_Node_File extends PHP_CodeCoverage_Report_Node
      * @var array
      */
     protected $testData;
-
-    /**
-     * @var array
-     */
-    protected $ignoredLines;
 
     /**
      * @var integer
@@ -163,9 +158,6 @@ class PHP_CodeCoverage_Report_Node_File extends PHP_CodeCoverage_Report_Node
 
         $this->coverageData = $coverageData;
         $this->testData     = $testData;
-        $this->ignoredLines = PHP_CodeCoverage_Util::getLinesToBeIgnored(
-                                $this->getPath(), $cacheTokens
-                              );
         $this->cacheTokens  = $cacheTokens;
 
         $this->calculateStatistics();
@@ -199,14 +191,6 @@ class PHP_CodeCoverage_Report_Node_File extends PHP_CodeCoverage_Report_Node
     public function getTestData()
     {
         return $this->testData;
-    }
-
-    /**
-     * @return array
-     */
-    public function getIgnoredLines()
-    {
-        return $this->ignoredLines;
     }
 
     /**
@@ -442,8 +426,7 @@ class PHP_CodeCoverage_Report_Node_File extends PHP_CodeCoverage_Report_Node
                 }
             }
 
-            if (!isset($this->ignoredLines[$lineNumber]) &&
-                isset($this->coverageData[$lineNumber]) &&
+            if (isset($this->coverageData[$lineNumber]) &&
                 $this->coverageData[$lineNumber] !== NULL) {
                 if (isset($currentClass)) {
                     $currentClass['executableLines']++;
@@ -463,8 +446,7 @@ class PHP_CodeCoverage_Report_Node_File extends PHP_CodeCoverage_Report_Node
 
                 $this->numExecutableLines++;
 
-                if (count($this->coverageData[$lineNumber]) > 0 ||
-                    isset($this->ignoredLines[$lineNumber])) {
+                if (count($this->coverageData[$lineNumber]) > 0) {
                     if (isset($currentClass)) {
                         $currentClass['executedLines']++;
                     }

@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  * @package    PHPUnit
  * @author     Bernhard Schussek <bschussek@2bepublished.at>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.6.0
@@ -51,7 +51,7 @@ require_once 'PHPUnit/Util/Type.php';
  *
  * @package    PHPUnit
  * @author     Bernhard Schussek <bschussek@2bepublished.at>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.6.0
@@ -75,9 +75,9 @@ class Util_TypeTest extends PHPUnit_Framework_TestCase
         $obj2->foo = 'bar';
 
         $obj = new stdClass;
-        //@codingStandardsIgnoreStart 
+        //@codingStandardsIgnoreStart
         $obj->null = NULL;
-        //@codingStandardsIgnoreEnd 
+        //@codingStandardsIgnoreEnd
         $obj->boolean = TRUE;
         $obj->integer = 1;
         $obj->double = 1.2;
@@ -109,7 +109,24 @@ class Util_TypeTest extends PHPUnit_Framework_TestCase
             array(1, '1'),
             array(1.0, '1.0'),
             array(1.2, '1.2'),
+            array(fopen('php://memory', 'r'), 'resource(%d) of type (stream)'),
             array('1', "'1'"),
+            array(array(array(1,2,3), array(3,4,5)),
+<<<EOF
+Array &0 (
+    0 => Array &1 (
+        0 => 1
+        1 => 2
+        2 => 3
+    )
+    1 => Array &2 (
+        0 => 3
+        1 => 4
+        2 => 5
+    )
+)
+EOF
+            ),
             // \n\r and \r is converted to \n
             array("this\nis\na\nvery\nvery\nvery\nvery\nvery\nvery\rlong\n\rtext",
 <<<EOF
@@ -126,10 +143,10 @@ long
 text'
 EOF
             ),
-            array(new stdClass, 'stdClass Object ()'),
+            array(new stdClass, 'stdClass Object &%x ()'),
             array($obj,
 <<<EOF
-stdClass Object (
+stdClass Object &%x (
     'null' => null
     'boolean' => true
     'integer' => 1
@@ -146,21 +163,21 @@ very
 very
 long
 text'
-    'object' => stdClass Object (
+    'object' => stdClass Object &%x (
         'foo' => 'bar'
     )
-    'objectagain' => stdClass Object (*RECURSION*)
-    'array' => Array (
+    'objectagain' => stdClass Object &%x
+    'array' => Array &%d (
         'foo' => 'bar'
     )
-    'self' => stdClass Object (*RECURSION*)
+    'self' => stdClass Object &%x
 )
 EOF
             ),
-            array(array(), 'Array ()'),
+            array(array(), 'Array &%d ()'),
             array($array,
 <<<EOF
-Array (
+Array &%d (
     0 => 0
     'null' => null
     'boolean' => true
@@ -178,14 +195,38 @@ very
 very
 long
 text'
-    'object' => stdClass Object (
+    'object' => stdClass Object &%x (
         'foo' => 'bar'
     )
-    'objectagain' => stdClass Object (*RECURSION*)
-    'array' => Array (
+    'objectagain' => stdClass Object &%x
+    'array' => Array &%d (
         'foo' => 'bar'
     )
-    'self' => Array (*RECURSION*)
+    'self' => Array &%d (
+        0 => 0
+        'null' => null
+        'boolean' => true
+        'integer' => 1
+        'double' => 1.2
+        'string' => '1'
+        'text' => 'this
+is
+a
+very
+very
+very
+very
+very
+very
+long
+text'
+        'object' => stdClass Object &%x
+        'objectagain' => stdClass Object &%x
+        'array' => Array &%d (
+            'foo' => 'bar'
+        )
+        'self' => Array &%d
+    )
 )
 EOF
             ),
@@ -213,7 +254,7 @@ EOF
      */
     public function testExport($value, $expected)
     {
-        $this->assertSame($expected, self::trimnl(PHPUnit_Util_Type::export($value)));
+        $this->assertStringMatchesFormat($expected, self::trimnl(PHPUnit_Util_Type::export($value)));
     }
 
     public function shortenedExportProvider()

@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2010-2011, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2010-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  * @package    PHPUnit_Selenium
  * @author     Jonathan Lipps <jlipps@gmail.com>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 1.2.0
@@ -47,15 +47,18 @@
  *
  * @package    PHPUnit_Selenium
  * @author     Jonathan Lipps <jlipps@gmail.com>
- * @copyright  2010-2011 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @version    Release: 1.2.9
+ * @version    Release: 1.2.12
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 1.2.9
  */
-define('SAUCE_ACCESS_KEY', getenv('SAUCE_ACCESS_KEY'));
-define('SAUCE_USERNAME', getenv('SAUCE_USERNAME'));
-define('SAUCE_HOST', SAUCE_ACCESS_KEY.':'.SAUCE_ACCESS_KEY.'@ondemand.saucelabs.com');
+
+if (defined('SAUCE_USERNAME') && defined('SAUCE_ACCESS_KEY')) {
+    define('SAUCE_HOST', constant('SAUCE_USERNAME').':'.constant('SAUCE_ACCESS_KEY').'@ondemand.saucelabs.com');
+} else {
+    define('SAUCE_HOST', '');
+}
 
 class Tests_Selenium2TestCase_MobileFeaturesTest extends PHPUnit_Extensions_Selenium2TestCase
 {
@@ -84,7 +87,7 @@ class Tests_Selenium2TestCase_MobileFeaturesTest extends PHPUnit_Extensions_Sele
 
     public function setUp()
     {
-        if (!SAUCE_ACCESS_KEY || !SAUCE_USERNAME) {
+        if (!defined('SAUCE_ACCESS_KEY') || !defined('SAUCE_USERNAME')) {
             $this->markTestSkipped("SAUCE_USERNAME and SAUCE_ACCESS_KEY must be set to run tests on Sauce");
         } elseif ($this->getBrowser() == 'iPhone') {
             $this->markTestSkipped('iPhone does not yet support touch interactions');
@@ -111,14 +114,12 @@ class Tests_Selenium2TestCase_MobileFeaturesTest extends PHPUnit_Extensions_Sele
     public function testTouchDownUp()
     {
         $this->touchDown(array('x' => 100, 'y' => 100));
-        sleep(2);
         $this->touchUp(array('x' => 100, 'y' => 100));
     }
 
     public function testGeneralFlick()
     {
         $this->flick(array('ySpeed' => -20));
-        sleep(3);
     }
 
     public function testTap()
@@ -145,7 +146,6 @@ class Tests_Selenium2TestCase_MobileFeaturesTest extends PHPUnit_Extensions_Sele
     public function testLongTap()
     {
         $this->byId('i am a link')->longtap();
-        sleep(3);
     }
 
     public function testLocation()

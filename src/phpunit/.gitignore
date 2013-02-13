@@ -12,3 +12,5 @@ Tests/TextUI/*.log
 Tests/TextUI/*.out
 Tests/TextUI/*.php
 phpunit.xml
+cache.properties
+.idea

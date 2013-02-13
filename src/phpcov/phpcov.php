@@ -3,7 +3,7 @@
 /**
  * PHP_CodeCoverage
  *
- * Copyright (c) 2011-2012, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2011-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,20 +36,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @package   PHP_CodeCoverage
- * @author    Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright 2011-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author    Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright 2011-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license   http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @since     File available since Release 1.0.0
  */
 
 if (strpos('@php_bin@', '@php_bin') === 0) {
-    set_include_path(dirname(__FILE__) . PATH_SEPARATOR . get_include_path());
+    require __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'autoload.php';
+} else {
+    require 'SebastianBergmann/PHPCOV/autoload.php';
 }
 
-require 'PHP/CodeCoverage/Autoload.php';
-require 'PHP/CodeCoverage/TextUI/Command.php';
-
-require 'ezc/Base/base.php';
-spl_autoload_register(array('ezcBase', 'autoload'));
-
-PHP_CodeCoverage_TextUI_Command::main();
+$textui = new SebastianBergmann\PHPCOV\Command;
+$textui->main();

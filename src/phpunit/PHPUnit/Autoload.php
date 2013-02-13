@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@
  *
  * @package    PHPUnit
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.5.0
@@ -48,6 +48,7 @@ require_once 'PHP/CodeCoverage/Autoload.php';
 require_once 'PHP/Timer/Autoload.php';
 require_once 'PHPUnit/Framework/MockObject/Autoload.php';
 require_once 'Text/Template/Autoload.php';
+require_once 'SebastianBergmann/Version/autoload.php';
 
 spl_autoload_register(
   function ($class)
@@ -126,6 +127,7 @@ spl_autoload_register(
             'phpunit_framework_expectationfailedexception' => '/Framework/ExpectationFailedException.php',
             'phpunit_framework_incompletetest' => '/Framework/IncompleteTest.php',
             'phpunit_framework_incompletetesterror' => '/Framework/IncompleteTestError.php',
+            'phpunit_framework_invalidcoverstargeterror' => '/Framework/InvalidCoversTargetError.php',
             'phpunit_framework_outputerror' => '/Framework/OutputError.php',
             'phpunit_framework_selfdescribing' => '/Framework/SelfDescribing.php',
             'phpunit_framework_skippedtest' => '/Framework/SkippedTest.php',
@@ -139,15 +141,20 @@ spl_autoload_register(
             'phpunit_framework_testresult' => '/Framework/TestResult.php',
             'phpunit_framework_testsuite' => '/Framework/TestSuite.php',
             'phpunit_framework_testsuite_dataprovider' => '/Framework/TestSuite/DataProvider.php',
+            'phpunit_framework_unintentionallycoveredcodeerror' => '/Framework/UnintentionallyCoveredCodeError.php',
             'phpunit_framework_warning' => '/Framework/Warning.php',
             'phpunit_runner_basetestrunner' => '/Runner/BaseTestRunner.php',
+            'phpunit_runner_filter_factory' => '/Runner/Filter/Factory.php',
+            'phpunit_runner_filter_group_exclude' => '/Runner/Filter/Group/Exclude.php',
+            'phpunit_runner_filter_group_include' => '/Runner/Filter/Group/Include.php',
+            'phpunit_runner_filter_groupfilteriterator' => '/Runner/Filter/Group.php',
+            'phpunit_runner_filter_test' => '/Runner/Filter/Test.php',
             'phpunit_runner_standardtestsuiteloader' => '/Runner/StandardTestSuiteLoader.php',
             'phpunit_runner_testsuiteloader' => '/Runner/TestSuiteLoader.php',
             'phpunit_runner_version' => '/Runner/Version.php',
             'phpunit_textui_command' => '/TextUI/Command.php',
             'phpunit_textui_resultprinter' => '/TextUI/ResultPrinter.php',
             'phpunit_textui_testrunner' => '/TextUI/TestRunner.php',
-            'phpunit_util_class' => '/Util/Class.php',
             'phpunit_util_configuration' => '/Util/Configuration.php',
             'phpunit_util_deprecatedfeature' => '/Util/DeprecatedFeature.php',
             'phpunit_util_deprecatedfeature_logger' => '/Util/DeprecatedFeature/Logger.php',
@@ -174,6 +181,7 @@ spl_autoload_register(
             'phpunit_util_testdox_resultprinter_text' => '/Util/TestDox/ResultPrinter/Text.php',
             'phpunit_util_testsuiteiterator' => '/Util/TestSuiteIterator.php',
             'phpunit_util_type' => '/Util/Type.php',
+            'phpunit_util_type_exportcontext' => '/Util/Type/ExportContext.php',
             'phpunit_util_xml' => '/Util/XML.php'
           );
 

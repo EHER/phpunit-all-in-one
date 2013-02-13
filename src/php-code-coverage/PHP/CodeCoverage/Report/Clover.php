@@ -2,7 +2,7 @@
 /**
  * PHP_CodeCoverage
  *
- * Copyright (c) 2009-2012, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2009-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.0.0
@@ -48,8 +48,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.0.0
@@ -94,10 +94,9 @@ class PHP_CodeCoverage_Report_Clover
             $xmlFile = $xmlDocument->createElement('file');
             $xmlFile->setAttribute('name', $item->getPath());
 
-            $classes      = $item->getClassesAndTraits();
-            $coverage     = $item->getCoverageData();
-            $lines        = array();
-            $ignoredLines = $item->getIgnoredLines();
+            $classes  = $item->getClassesAndTraits();
+            $coverage = $item->getCoverageData();
+            $lines    = array();
 
             foreach ($classes as $className => $class) {
                 $classStatements        = 0;
@@ -112,10 +111,6 @@ class PHP_CodeCoverage_Report_Clover
                     for ($i  = $method['startLine'];
                          $i <= $method['endLine'];
                          $i++) {
-                        if (isset($ignoredLines[$i])) {
-                            continue;
-                        }
-
                         $add   = TRUE;
                         $count = 0;
 
@@ -216,9 +211,7 @@ class PHP_CodeCoverage_Report_Clover
             }
 
             foreach ($coverage as $line => $data) {
-                if ($data === NULL ||
-                    isset($lines[$line]) ||
-                    isset($ignoredLines[$line])) {
+                if ($data === NULL || isset($lines[$line])) {
                     continue;
                 }
 
@@ -230,10 +223,6 @@ class PHP_CodeCoverage_Report_Clover
             ksort($lines);
 
             foreach ($lines as $line => $data) {
-                if (isset($ignoredLines[$line])) {
-                    continue;
-                }
-
                 $xmlLine = $xmlDocument->createElement('line');
                 $xmlLine->setAttribute('num', $line);
                 $xmlLine->setAttribute('type', $data['type']);

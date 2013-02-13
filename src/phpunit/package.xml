@@ -60,6 +60,9 @@
       <file baseinstalldir="/" name="Type.php" role="php" />
      </dir>
      <dir name="Constraint">
+      <dir name="JsonMatches">
+       <file baseinstalldir="/" name="ErrorMessageProvider.php" role="php" />
+      </dir>
       <file baseinstalldir="/" name="And.php" role="php" />
       <file baseinstalldir="/" name="ArrayHasKey.php" role="php" />
       <file baseinstalldir="/" name="Attribute.php" role="php" />
@@ -68,9 +71,9 @@
       <file baseinstalldir="/" name="ClassHasStaticAttribute.php" role="php" />
       <file baseinstalldir="/" name="Composite.php" role="php" />
       <file baseinstalldir="/" name="Count.php" role="php" />
-      <file baseinstalldir="/" name="Exception.php" role="php" />
       <file baseinstalldir="/" name="ExceptionCode.php" role="php" />
       <file baseinstalldir="/" name="ExceptionMessage.php" role="php" />
+      <file baseinstalldir="/" name="Exception.php" role="php" />
       <file baseinstalldir="/" name="FileExists.php" role="php" />
       <file baseinstalldir="/" name="GreaterThan.php" role="php" />
       <file baseinstalldir="/" name="IsAnything.php" role="php" />
@@ -82,6 +85,7 @@
       <file baseinstalldir="/" name="IsNull.php" role="php" />
       <file baseinstalldir="/" name="IsTrue.php" role="php" />
       <file baseinstalldir="/" name="IsType.php" role="php" />
+      <file baseinstalldir="/" name="JsonMatches.php" role="php" />
       <file baseinstalldir="/" name="LessThan.php" role="php" />
       <file baseinstalldir="/" name="Not.php" role="php" />
       <file baseinstalldir="/" name="ObjectHasAttribute.php" role="php" />
@@ -92,8 +96,8 @@
       <file baseinstalldir="/" name="StringEndsWith.php" role="php" />
       <file baseinstalldir="/" name="StringMatches.php" role="php" />
       <file baseinstalldir="/" name="StringStartsWith.php" role="php" />
-      <file baseinstalldir="/" name="TraversableContains.php" role="php" />
       <file baseinstalldir="/" name="TraversableContainsOnly.php" role="php" />
+      <file baseinstalldir="/" name="TraversableContains.php" role="php" />
       <file baseinstalldir="/" name="Xor.php" role="php" />
      </dir>
      <dir name="Error">
@@ -118,6 +122,7 @@
      <file baseinstalldir="/" name="ExpectationFailedException.php" role="php" />
      <file baseinstalldir="/" name="IncompleteTestError.php" role="php" />
      <file baseinstalldir="/" name="IncompleteTest.php" role="php" />
+     <file baseinstalldir="/" name="InvalidCoversTargetError.php" role="php" />
      <file baseinstalldir="/" name="OutputError.php" role="php" />
      <file baseinstalldir="/" name="SelfDescribing.php" role="php" />
      <file baseinstalldir="/" name="SkippedTestError.php" role="php" />
@@ -130,9 +135,19 @@
      <file baseinstalldir="/" name="Test.php" role="php" />
      <file baseinstalldir="/" name="TestResult.php" role="php" />
      <file baseinstalldir="/" name="TestSuite.php" role="php" />
+     <file baseinstalldir="/" name="UnintentionallyCoveredCodeError.php" role="php" />
      <file baseinstalldir="/" name="Warning.php" role="php" />
     </dir>
     <dir name="Runner">
+     <dir name="Filter">
+      <dir name="Group">
+       <file baseinstalldir="/" name="Exclude.php" role="php" />
+       <file baseinstalldir="/" name="Include.php" role="php" />
+      </dir>
+      <file baseinstalldir="/" name="Factory.php" role="php" />
+      <file baseinstalldir="/" name="Group.php" role="php" />
+      <file baseinstalldir="/" name="Test.php" role="php" />
+     </dir>
      <file baseinstalldir="/" name="BaseTestRunner.php" role="php" />
      <file baseinstalldir="/" name="StandardTestSuiteLoader.php" role="php" />
      <file baseinstalldir="/" name="TestSuiteLoader.php" role="php" />
@@ -164,7 +179,9 @@
       <file baseinstalldir="/" name="NamePrettifier.php" role="php" />
       <file baseinstalldir="/" name="ResultPrinter.php" role="php" />
      </dir>
-     <file baseinstalldir="/" name="Class.php" role="php" />
+     <dir name="Type">
+      <file baseinstalldir="/" name="ExportContext.php" role="php" />
+     </dir>
      <file baseinstalldir="/" name="Configuration.php" role="php" />
      <file baseinstalldir="/" name="DeprecatedFeature.php" role="php" />
      <file baseinstalldir="/" name="Diff.php" role="php" />
@@ -227,7 +244,7 @@
    <package>
     <name>PHP_Timer</name>
     <channel>pear.phpunit.de</channel>
-    <min>1.0.2</min>
+    <min>1.1.0</min>
    </package>
    <package>
     <name>PHPUnit_MockObject</name>
@@ -239,6 +256,12 @@
     <name>Yaml</name>
     <channel>pear.symfony.com</channel>
     <min>2.1.0</min>
+    <max>2.1.99</max>
+   </package>
+   <package>
+    <name>Version</name>
+    <channel>pear.phpunit.de</channel>
+    <min>1.0.0</min>
    </package>
    <extension>
     <name>dom</name>
@@ -246,18 +269,12 @@
    <extension>
     <name>pcre</name>
    </extension>
-   <extension>
-    <name>reflection</name>
-   </extension>
-   <extension>
-    <name>spl</name>
-   </extension>
   </required>
   <optional>
    <package>
     <name>PHP_Invoker</name>
     <channel>pear.phpunit.de</channel>
-    <min>1.1.0</min>
+    <min>1.2.0</min>
    </package>
    <extension>
     <name>json</name>

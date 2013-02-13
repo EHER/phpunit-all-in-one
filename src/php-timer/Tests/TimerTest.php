@@ -2,7 +2,7 @@
 /**
  * PHP_Timer
  *
- * Copyright (c) 2010, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2010-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
  *
  * @package    PHP
  * @subpackage Timer
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2010 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2010 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-timer
  * @since      File available since Release 1.0.0
@@ -50,8 +50,8 @@ require_once dirname(dirname(__FILE__)) . '/PHP/Timer.php';
  *
  * @package    PHP
  * @subpackage Timer
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2010-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2010-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @version    Release: 1.0.4
  * @link       http://github.com/sebastianbergmann/php-timer
@@ -59,14 +59,20 @@ require_once dirname(dirname(__FILE__)) . '/PHP/Timer.php';
  */
 class PHP_TimerTest extends PHPUnit_Framework_TestCase
 {
+    private $timer;
+
+    protected function setUp()
+    {
+        $this->timer = new PHP_Timer;
+    }
+
     /**
      * @covers PHP_Timer::start
      * @covers PHP_Timer::stop
      */
     public function testStartStop()
     {
-        PHP_Timer::start();
-        $this->assertInternalType('float', PHP_Timer::stop());
+        $this->assertInternalType('float', $this->timer->stop());
     }
 
     /**
@@ -74,15 +80,15 @@ class PHP_TimerTest extends PHPUnit_Framework_TestCase
      */
     public function testSecondsToTimeString()
     {
-        $this->assertEquals('0 seconds', PHP_Timer::secondsToTimeString(0));
-        $this->assertEquals('1 second', PHP_Timer::secondsToTimeString(1));
-        $this->assertEquals('2 seconds', PHP_Timer::secondsToTimeString(2));
-        $this->assertEquals('01:00', PHP_Timer::secondsToTimeString(60));
-        $this->assertEquals('01:01', PHP_Timer::secondsToTimeString(61));
-        $this->assertEquals('02:00', PHP_Timer::secondsToTimeString(120));
-        $this->assertEquals('02:01', PHP_Timer::secondsToTimeString(121));
-        $this->assertEquals('01:00:00', PHP_Timer::secondsToTimeString(3600));
-        $this->assertEquals('01:00:01', PHP_Timer::secondsToTimeString(3601));
+        $this->assertEquals('0 seconds', $this->timer->secondsToTimeString(0));
+        $this->assertEquals('1 second', $this->timer->secondsToTimeString(1));
+        $this->assertEquals('2 seconds', $this->timer->secondsToTimeString(2));
+        $this->assertEquals('01:00', $this->timer->secondsToTimeString(60));
+        $this->assertEquals('01:01', $this->timer->secondsToTimeString(61));
+        $this->assertEquals('02:00', $this->timer->secondsToTimeString(120));
+        $this->assertEquals('02:01', $this->timer->secondsToTimeString(121));
+        $this->assertEquals('01:00:00', $this->timer->secondsToTimeString(3600));
+        $this->assertEquals('01:00:01', $this->timer->secondsToTimeString(3601));
     }
 
     /**
@@ -91,7 +97,7 @@ class PHP_TimerTest extends PHPUnit_Framework_TestCase
     public function testTimeSinceStartOfRequest()
     {
         $this->assertStringMatchesFormat(
-          '%i %s', PHP_Timer::timeSinceStartOfRequest()
+          '%i %s', $this->timer->timeSinceStartOfRequest()
         );
     }
 
@@ -102,7 +108,7 @@ class PHP_TimerTest extends PHPUnit_Framework_TestCase
     public function testResourceUsage()
     {
         $this->assertStringMatchesFormat(
-          'Time: %s, Memory: %s', PHP_Timer::resourceUsage()
+          'Time: %s, Memory: %s', $this->timer->resourceUsage()
         );
     }
 }

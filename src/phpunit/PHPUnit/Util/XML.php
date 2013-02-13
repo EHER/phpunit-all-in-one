@@ -2,7 +2,7 @@
 /**
  * PHPUnit
  *
- * Copyright (c) 2001-2012, Sebastian Bergmann <sebastian@phpunit.de>.
+ * Copyright (c) 2001-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,7 +37,7 @@
  * @package    PHPUnit
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      File available since Release 3.2.0
@@ -49,7 +49,7 @@
  * @package    PHPUnit
  * @subpackage Util
  * @author     Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright  2001-2012 Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2001-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://www.phpunit.de/
  * @since      Class available since Release 3.2.0
@@ -64,9 +64,12 @@ class PHPUnit_Util_XML
      */
     public static function prepareString($string)
     {
-        return preg_replace(
-          '([\\x00-\\x04\\x0b\\x0c\\x0e-\\x1f\\x7f])e',
-          'sprintf( "&#x%02x;", ord( "\\1" ) )',
+        return preg_replace_callback(
+          '([\\x00-\\x04\\x0b\\x0c\\x0e-\\x1f\\x7f])',
+          function ($matches)
+          {
+              return sprintf('&#x%02x;', ord($matches[1]));
+          },
           htmlspecialchars(
             PHPUnit_Util_String::convertToUtf8($string), ENT_COMPAT, 'UTF-8'
           )
@@ -469,7 +472,7 @@ class PHPUnit_Util_XML
      * @param  string  $content
      * @param  mixed   $actual
      * @param  boolean $isHtml
-     * @return false|array
+     * @return boolean|array
      * @since  Method available since Release 3.3.0
      * @author Mike Naberezny <mike@maintainable.com>
      * @author Derek DeVries <derek@maintainable.com>
@@ -828,8 +831,7 @@ class PHPUnit_Util_XML
                 }
             }
 
-            $nodes    = $filtered;
-            $filtered = array();
+            $nodes = $filtered;
 
             if (empty($nodes)) {
                 return;

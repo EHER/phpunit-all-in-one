@@ -35,6 +35,10 @@
      <dir name="Driver">
       <file baseinstalldir="/" name="Xdebug.php" role="php" />
      </dir>
+     <dir name="Exception">
+      <file baseinstalldir="/" name="InvalidCoversTarget.php" role="php" />
+      <file baseinstalldir="/" name="UnintentionallyCoveredCode.php" role="php" />
+     </dir>
      <dir name="Report">
       <dir name="HTML">
        <dir name="Renderer">
@@ -51,6 +55,7 @@
          <dir name="js">
           <file baseinstalldir="/" name="bootstrap.min.js" role="php" />
           <file baseinstalldir="/" name="highcharts.js" role="php" />
+          <file baseinstalldir="/" name="html5shiv.js" role="php" />
           <file baseinstalldir="/" name="jquery.min.js" role="php" />
          </dir>
          <file baseinstalldir="/" name="coverage_bar.html.dist" role="php" />
@@ -87,7 +92,6 @@
      <file baseinstalldir="/" name="Exception.php" role="php" />
      <file baseinstalldir="/" name="Filter.php" role="php" />
      <file baseinstalldir="/" name="Util.php" role="php" />
-     <file baseinstalldir="/" name="Version.php" role="php" />
     </dir>
     <file baseinstalldir="/" name="CodeCoverage.php" role="php" />
    </dir>
@@ -118,16 +122,15 @@
     <channel>pear.phpunit.de</channel>
     <min>1.1.1</min>
    </package>
+   <package>
+    <name>Version</name>
+    <channel>pear.phpunit.de</channel>
+    <min>1.0.0</min>
+   </package>
   </required>
   <optional>
    <extension>
     <name>dom</name>
-   </extension>
-   <extension>
-    <name>reflection</name>
-   </extension>
-   <extension>
-    <name>spl</name>
    </extension>
    <extension>
     <name>xdebug</name>

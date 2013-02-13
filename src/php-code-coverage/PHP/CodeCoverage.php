@@ -2,7 +2,7 @@
 /**
  * PHP_CodeCoverage
  *
- * Copyright (c) 2009-2012, Sebastian Bergmann <sb@sebastian-bergmann.de>.
+ * Copyright (c) 2009-2013, Sebastian Bergmann <sebastian@phpunit.de>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      File available since Release 1.0.0
@@ -48,8 +48,8 @@
  *
  * @category   PHP
  * @package    CodeCoverage
- * @author     Sebastian Bergmann <sb@sebastian-bergmann.de>
- * @copyright  2009-2012 Sebastian Bergmann <sb@sebastian-bergmann.de>
+ * @author     Sebastian Bergmann <sebastian@phpunit.de>
+ * @copyright  2009-2013 Sebastian Bergmann <sebastian@phpunit.de>
  * @license    http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
  * @link       http://github.com/sebastianbergmann/php-code-coverage
  * @since      Class available since Release 1.0.0
@@ -70,6 +70,11 @@ class PHP_CodeCoverage
      * @var boolean
      */
     protected $cacheTokens = FALSE;
+
+    /**
+     * @var boolean
+     */
+    protected $checkForUnintentionallyCoveredCode = FALSE;
 
     /**
      * @var boolean
@@ -102,6 +107,11 @@ class PHP_CodeCoverage
      * @var array
      */
     protected $data = array();
+
+    /**
+     * @var array
+     */
+    protected $ignoredLines = array();
 
     /**
      * Test data.
@@ -261,6 +271,7 @@ class PHP_CodeCoverage
         }
 
         $this->applyListsFilter($data);
+        $this->applyIgnoredLinesFilter($data);
         $this->initializeFilesThatAreSeenTheFirstTime($data);
 
         if (!$append) {
@@ -361,6 +372,22 @@ class PHP_CodeCoverage
     /**
      * @param  boolean $flag
      * @throws PHP_CodeCoverage_Exception
+     * @since  Method available since Release 1.3.0
+     */
+    public function setCheckForUnintentionallyCoveredCode($flag)
+    {
+        if (!is_bool($flag)) {
+            throw PHP_CodeCoverage_Util_InvalidArgumentHelper::factory(
+              1, 'boolean'
+            );
+        }
+
+        $this->checkForUnintentionallyCoveredCode = $flag;
+    }
+
+    /**
+     * @param  boolean $flag
+     * @throws PHP_CodeCoverage_Exception
      */
     public function setForceCoversAnnotation($flag)
     {
@@ -421,16 +448,24 @@ class PHP_CodeCoverage
     /**
      * Applies the @covers annotation filtering.
      *
-     * @param array $data
-     * @param mixed $id
+     * @param  array $data
+     * @param  mixed $id
+     * @throws PHP_CodeCoverage_Exception_UnintentionallyCoveredCode
      */
     protected function applyCoversAnnotationFilter(&$data, $id)
     {
+        $unintentionallyCoveredCode = FALSE;
+
         if ($id instanceof PHPUnit_Framework_TestCase) {
             $testClassName    = get_class($id);
             $linesToBeCovered = $this->getLinesToBeCovered(
               $testClassName, $id->getName()
             );
+
+            if ($linesToBeCovered === FALSE) {
+                $data = array();
+                return;
+            }
 
             if ($this->mapTestClassNameToCoveredClassName &&
                 empty($linesToBeCovered)) {
@@ -451,11 +486,27 @@ class PHP_CodeCoverage
         }
 
         if (!empty($linesToBeCovered)) {
-            $data = array_intersect_key($data, $linesToBeCovered);
+            $count = count($data);
+            $data  = array_intersect_key($data, $linesToBeCovered);
+
+            if ($this->checkForUnintentionallyCoveredCode &&
+                $count != count($data)) {
+                throw new PHP_CodeCoverage_Exception_UnintentionallyCoveredCode;
+            }
 
             foreach (array_keys($data) as $filename) {
+                $_linesToBeCovered = array_flip($linesToBeCovered[$filename]);
+
+                if ($this->checkForUnintentionallyCoveredCode) {
+                    foreach ($data[$filename] as $k => $v) {
+                        if ($v == 1 && !isset($_linesToBeCovered[$k])) {
+                            throw new PHP_CodeCoverage_Exception_UnintentionallyCoveredCode;
+                        }
+                    }
+                }
+
                 $data[$filename] = array_intersect_key(
-                  $data[$filename], array_flip($linesToBeCovered[$filename])
+                  $data[$filename], $_linesToBeCovered
                 );
             }
         }
@@ -474,6 +525,24 @@ class PHP_CodeCoverage
     {
         foreach (array_keys($data) as $filename) {
             if ($this->filter->isFiltered($filename)) {
+                unset($data[$filename]);
+            }
+        }
+    }
+
+    /**
+     * Applies the "ignored lines" filtering.
+     *
+     * @param array $data
+     */
+    protected function applyIgnoredLinesFilter(&$data)
+    {
+        foreach (array_keys($data) as $filename) {
+            foreach ($this->getLinesToBeIgnored($filename) as $line) {
+                unset($data[$filename][$line]);
+            }
+
+            if (empty($data[$filename])) {
                 unset($data[$filename]);
             }
         }
@@ -597,7 +666,7 @@ class PHP_CodeCoverage
         }
 
         if (strpos($docComment, '@coversNothing') !== FALSE) {
-            return $result;
+            return FALSE;
         }
 
         $classShortcut = preg_match_all(
@@ -676,7 +745,7 @@ class PHP_CodeCoverage
                 foreach ($classes as $className) {
                     if (!class_exists($className) &&
                         !interface_exists($className)) {
-                        throw new PHP_CodeCoverage_Exception(
+                        throw new PHP_CodeCoverage_Exception_InvalidCoversTarget(
                           sprintf(
                             'Trying to @cover not existing class or ' .
                             'interface "%s".',
@@ -724,7 +793,7 @@ class PHP_CodeCoverage
                                interface_exists($className) ||
                                trait_exists($className)) &&
                               method_exists($className, $methodName))) {
-                            throw new PHP_CodeCoverage_Exception(
+                            throw new PHP_CodeCoverage_Exception_InvalidCoversTarget(
                               sprintf(
                                 'Trying to @cover not existing method "%s::%s".',
                                 $className,
@@ -764,7 +833,7 @@ class PHP_CodeCoverage
                 if (!class_exists($className) &&
                     !interface_exists($className) &&
                     !trait_exists($className)) {
-                    throw new PHP_CodeCoverage_Exception(
+                    throw new PHP_CodeCoverage_Exception_InvalidCoversTarget(
                       sprintf(
                         'Trying to @cover not existing class or ' .
                         'interface "%s".',
@@ -778,5 +847,179 @@ class PHP_CodeCoverage
         }
 
         return $codeToCoverList;
+    }
+
+    /**
+     * Returns the lines of a source file that should be ignored.
+     *
+     * @param  string $filename
+     * @return array
+     * @throws PHP_CodeCoverage_Exception
+     * @since  Method available since Release 1.3.0
+     */
+    protected function getLinesToBeIgnored($filename)
+    {
+        if (!is_string($filename)) {
+            throw PHP_CodeCoverage_Util_InvalidArgumentHelper::factory(
+              1, 'string'
+            );
+        }
+
+        if (!isset($this->ignoredLines[$filename])) {
+            $this->ignoredLines[$filename] = array();
+            $ignore                        = FALSE;
+            $stop                          = FALSE;
+            $lines                         = file($filename);
+            $numLines                      = count($lines);
+
+            foreach ($lines as $index => $line) {
+                if (!trim($line)) {
+                    $this->ignoredLines[$filename][] = $index + 1;
+                }
+            }
+
+            if ($this->cacheTokens) {
+                $tokens = PHP_Token_Stream_CachingFactory::get($filename);
+            } else {
+                $tokens = new PHP_Token_Stream($filename);
+            }
+
+            $classes = array_merge($tokens->getClasses(), $tokens->getTraits());
+            $tokens  = $tokens->tokens();
+
+            foreach ($tokens as $token) {
+                switch (get_class($token)) {
+                    case 'PHP_Token_COMMENT':
+                    case 'PHP_Token_DOC_COMMENT': {
+                        $count = substr_count($token, "\n");
+                        $line  = $token->getLine();
+
+                        for ($i = $line; $i < $line + $count; $i++) {
+                            $this->ignoredLines[$filename][] = $i;
+                        }
+
+                        if ($token instanceof PHP_Token_DOC_COMMENT) {
+                            // Workaround for the fact the DOC_COMMENT token
+                            // does not include the final \n character in its
+                            // text.
+                            if (substr(trim($lines[$i-1]), -2) == '*/') {
+                                $this->ignoredLines[$filename][] = $i;
+                            }
+
+                            break;
+                        }
+
+                        $_token = trim($token);
+
+                        if ($_token == '// @codeCoverageIgnore' ||
+                            $_token == '//@codeCoverageIgnore') {
+                            $ignore = TRUE;
+                            $stop   = TRUE;
+                        }
+
+                        else if ($_token == '// @codeCoverageIgnoreStart' ||
+                                 $_token == '//@codeCoverageIgnoreStart') {
+                            $ignore = TRUE;
+                        }
+
+                        else if ($_token == '// @codeCoverageIgnoreEnd' ||
+                                 $_token == '//@codeCoverageIgnoreEnd') {
+                            $stop = TRUE;
+                        }
+                    }
+                    break;
+
+                    case 'PHP_Token_INTERFACE':
+                    case 'PHP_Token_TRAIT':
+                    case 'PHP_Token_CLASS':
+                    case 'PHP_Token_FUNCTION': {
+                        $docblock = $token->getDocblock();
+
+                        if (strpos($docblock, '@codeCoverageIgnore')) {
+                            $endLine = $token->getEndLine();
+
+                            for ($i = $token->getLine(); $i <= $endLine; $i++) {
+                                $this->ignoredLines[$filename][] = $i;
+                            }
+                        }
+
+                        else if ($token instanceof PHP_Token_INTERFACE ||
+                                 $token instanceof PHP_Token_TRAIT ||
+                                 $token instanceof PHP_Token_CLASS) {
+                            if (empty($classes[$token->getName()]['methods'])) {
+                                for ($i = $token->getLine();
+                                     $i <= $token->getEndLine();
+                                     $i++) {
+                                    $this->ignoredLines[$filename][] = $i;
+                                }
+                            } else {
+                                $firstMethod = array_shift(
+                                  $classes[$token->getName()]['methods']
+                                );
+
+                                $lastMethod = array_pop(
+                                  $classes[$token->getName()]['methods']
+                                );
+
+                                if ($lastMethod === NULL) {
+                                    $lastMethod = $firstMethod;
+                                }
+
+                                for ($i = $token->getLine();
+                                     $i < $firstMethod['startLine'];
+                                     $i++) {
+                                    $this->ignoredLines[$filename][] = $i;
+                                }
+
+                                for ($i = $token->getEndLine();
+                                     $i > $lastMethod['endLine'];
+                                     $i--) {
+                                    $this->ignoredLines[$filename][] = $i;
+                                }
+                            }
+                        }
+                    }
+                    break;
+
+                    case 'PHP_Token_INTERFACE': {
+                        $endLine = $token->getEndLine();
+
+                        for ($i = $token->getLine(); $i <= $endLine; $i++) {
+                            $this->ignoredLines[$filename][] = $i;
+                        }
+                    }
+                    break;
+
+                    case 'PHP_Token_NAMESPACE': {
+                        $this->ignoredLines[$filename][] = $token->getEndLine();
+                    } // Intentional fallthrough
+                    case 'PHP_Token_OPEN_TAG':
+                    case 'PHP_Token_CLOSE_TAG':
+                    case 'PHP_Token_USE': {
+                        $this->ignoredLines[$filename][] = $token->getLine();
+                    }
+                    break;
+                }
+
+                if ($ignore) {
+                    $this->ignoredLines[$filename][] = $token->getLine();
+
+                    if ($stop) {
+                        $ignore = FALSE;
+                        $stop   = FALSE;
+                    }
+                }
+            }
+
+            $this->ignoredLines[$filename][] = $numLines + 1;
+
+            $this->ignoredLines[$filename] = array_unique(
+              $this->ignoredLines[$filename]
+            );
+
+            sort($this->ignoredLines[$filename]);
+        }
+
+        return $this->ignoredLines[$filename];
     }
 }
