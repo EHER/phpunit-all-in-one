@@ -19,7 +19,7 @@ Add ["zerkalica/phpunit"](http://packagist.org/packages/zerkalica/phpunit) packa
 
     {
         "require": {
-            "php":          ">=5.3.2",
+            "php":          ">=5.4.0",
             "zerkalica/phpunit": ">=1.2"
         }
     }
