@@ -108,13 +108,13 @@ namespace SebastianBergmann\PHPCPD\TextUI
                   $printClones ? ":\n" . $buffer : ".\n"
                 );
             }
-
+            $timer = new \PHP_Timer;
             printf(
               "%s%s duplicated lines out of %d total lines of code.\n\n%s\n",
               $numClones > 0 ? "\n" : '',
               $clones->getPercentage(),
               $clones->getNumLines(),
-              \PHP_Timer::resourceUsage()
+              $timer->resourceUsage()
             );
         }
     }
