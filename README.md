@@ -28,3 +28,7 @@ After install/update vendors with Composer, you can simply run
 
     php vendor/EHER/PHPUnit/phpunit.php
 
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/EHER/phpunit-all-in-one/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
