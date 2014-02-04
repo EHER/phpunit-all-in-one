@@ -68,7 +68,7 @@ fix_ezc() {
         cp -R $i/src $EZC_ROOT/$(basename $i)
         cp $i/src/*_autoload.php "$EZC_AUTOLOAD"
     done
-    sed "s/\(\$libraryMode =[ ]*\).*/\1'pear';/g" -i $EZC_ROOT/Base/base.php
+    perl -pi -e "s/\(\$libraryMode =[ ]*\).*/\1'pear';/g" -i $EZC_ROOT/Base/base.php
 }
 
 fix_finder_facade() {
@@ -79,8 +79,8 @@ fix_finder_facade() {
 
 fix_eoln() {
     cd $VENDOR
-    find . -type f -name '*.html' -exec sed 's/\r//g' -i {} \;
-    find . -type f -name '*.bat' -exec sed 's/\r//g' -i {} \;
+    find . -type f -name '*.html' -exec perl -pi -e 's/\r//g' -i {} \;
+    find . -type f -name '*.bat' -exec perl -pi -e 's/\r//g' -i {} \;
 }
 
 clean() {
